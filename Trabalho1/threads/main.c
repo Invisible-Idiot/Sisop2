@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include "../manager.h"
+#include "../open.h"
+#define SUCCESS 1
+#define ARGUMENT_ERROR 2
 
 int m, x, n;
 int** matrix1;
@@ -8,6 +12,21 @@ int** matrix2;
 int** resultMatrix;
 
 int p;
+
+void printMatrix(int** matrix, int lines, int columns)
+{
+	int i, j;
+
+	for(i = 0; i < lines; i++)
+	{
+		for(j = 0; j < columns; j++)
+		{
+			fprintf(stderr, "%d\t", matrix[i][j]);
+		}
+		
+		fprintf(stderr, "\n");
+	}
+}
 
 int* multiplyAt(int lineNumber)
 {
@@ -25,22 +44,78 @@ int* multiplyAt(int lineNumber)
 	return line;
 }
 
-void* fillMatrix(void* this)
+void* fillMatrix(void* arg)
 {
 	int i;
+	int* this = (int*) arg;
 
 	for(i = 0; i < m; i++)
 	{
 		if(i % p == *this)
 		{
+			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
+
 			resultMatrix[i] = multiplyAt(i);
 		}
 	}
 }
 
+int** initResult()
+{
+	int i, j;
+	int** matrix = (int**) calloc(m, sizeof(int*));
+
+	for(i = 0; i < x; i++)
+	{
+		matrix[i] = (int*) calloc(n, sizeof(int));
+	}
+
+	return matrix;
+}
+
+int init()
+{
+	int x1, x2;
+
+	matrix1 = open("../in1.txt", &m, &x1);
+	matrix2 = open("../in2.txt", &x2, &n);
+
+	if(x1 != x2)
+		return ARGUMENT_ERROR;
+
+	x = x1;
+
+	resultMatrix = initResult();
+
+	return SUCCESS;
+}
+
 int main(int argc, char* argv[])
 {
 	int i;
+	int status;
+
+	if(argc < 2)
+	{
+		printf("Please provide a value for P\n");
+		exit(0);
+	}
+
+	p = atoi(argv[1]);
+
+	if(p == 0)
+	{
+		printf("P must be an integer larger than 0\n");
+		exit(0);
+	}
+
+	status = init();
+
+	if(status != SUCCESS)
+	{
+		printf("Matrices are incompatible\n");
+		exit(0);
+	}
 
 	resultMatrix = (int**) calloc(m, sizeof(int*));
 
@@ -58,4 +133,6 @@ int main(int argc, char* argv[])
 	{
 		pthread_join(pthreads[i], NULL);
 	}
+
+	printMatrix(resultMatrix, m, n);
 }

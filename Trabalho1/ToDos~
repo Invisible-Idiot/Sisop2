@@ -1,0 +1,3 @@
+- Corrigir bug que faz ultima linha e coluna da matriz ficar errada;
+- Fazer consistência para se certificar de que a matriz é de fato das dimensões dadas;
+- Unificar tratamento de exceções

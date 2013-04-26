@@ -40,8 +40,3 @@ void saveMatrix(int x, int** matrix)
  {
      matrix[(i * size) + j] = value;
  }
-
- void add(int i, int size, int j, int value, int* matrix)
- {
-     matrix[(i * size) + j] += value;
- }

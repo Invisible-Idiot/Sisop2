@@ -4,13 +4,18 @@
 #include <sys/types.h> /* for pid_t */
 #include <sys/wait.h> /* for wait */
 #include <sys/mman.h> /* for mmap */
+#include "../manager.h"
+#include "../open.h"
+#define SUCCESS 1
+#define ARGUMENT_ERROR 2
+//#define MANUAL
 
-int m = 4, x = 2, n = 3;
+int m, x, n;
 int** matrix1;
 int** matrix2;
-int** resultMatrix;
+int* resultMatrix;
 
-int p = 3;
+int p;
 
 void printMatrix(int** matrix, int lines, int columns)
 {
@@ -27,6 +32,22 @@ void printMatrix(int** matrix, int lines, int columns)
 	}
 }
 
+void printResult(int* matrix, int lines, int columns)
+{
+	int i, j;
+
+	for(i = 0; i < lines; i++)
+	{
+		for(j = 0; j < columns; j++)
+		{
+			fprintf(stderr, "%d\t", get(i, columns, j, matrix));
+		}
+		
+		fprintf(stderr, "\n");
+	}
+}
+
+#ifdef MANUAL
 void initMatrix1()
 {
 	int i, j;
@@ -60,18 +81,31 @@ void initMatrix2()
 
 	printMatrix(matrix1, x, n);
 }
+#endif
 
-void initResult()
+int* initResult()
 {
-	int i, j;
-	resultMatrix = (int**) mmap(0, m * sizeof(int*), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANON, -1, 0);
-
-	for(i = 0; i < x; i++)
-	{
-		resultMatrix[i] = (int*) mmap(0, n * sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANON, -1, 0);
-	}
+	return (int*) mmap(0, m * n * sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANON, -1, 0);
 }
 
+int init()
+{
+	int x1, x2;
+
+	matrix1 = open("../in1.txt", &m, &x1);
+	matrix2 = open("../in2.txt", &x2, &n);
+
+	if(x1 != x2)
+		return ARGUMENT_ERROR;
+
+	x = x1;
+
+	resultMatrix = initResult();
+
+	return SUCCESS;
+}
+
+/*
 int* multiplyAt(int lineNumber)
 {
 	int* line = (int*) calloc(n, sizeof(int));
@@ -87,23 +121,57 @@ int* multiplyAt(int lineNumber)
 
 	return line;
 }
+*/
+
+void multiplyAt(int lineNumber)
+{
+	int i, j;
+	int mul;
+
+	for(i = 0; i < n; i++)
+	{
+		set(lineNumber, x, i, 0, resultMatrix);
+
+		for(j = 0; j < x; j++)
+		{
+			mul = matrix1[lineNumber][j] * matrix2[j][i];
+			add(lineNumber, x, i, mul, resultMatrix);
+		}
+	}
+}
 
 int main(int argc, char* argv[])
 {
 	int i, j;
 	int this = 0;
 	pid_t pid;
+	int status;
 
-	initMatrix1();
-	fprintf(stderr, "\n");
-	initMatrix2();
-	fprintf(stderr, "\n");
+	if(argc < 2)
+	{
+		printf("Please provide a value for P\n");
+		exit(0);
+	}
 
-	initResult();
+	p = atoi(argv[1]);
+
+	if(p == 0)
+	{
+		printf("P must be an integer larger than 0\n");
+		exit(0);
+	}
+
+	status = init();
+
+	if(status != SUCCESS)
+	{
+		printf("Matrices are incompatible\n");
+		exit(0);
+	}
 
 	fprintf(stderr, "Process #%d says hello\n", this);
 
-	for(i = 0; i < p; i++)
+	for(i = 1; i < p; i++)
 	{
 		pid = fork();
 
@@ -126,7 +194,7 @@ int main(int argc, char* argv[])
 		if(j % p == this)
 		{
 			fprintf(stderr, "Process #%d will begin line %d\n", this, j);
-			resultMatrix[j] = multiplyAt(j);
+			multiplyAt(j);
 			fprintf(stderr, "Process #%d multiplied line %d\n", this, j);
 		}
 	}
@@ -147,5 +215,5 @@ int main(int argc, char* argv[])
 
 	fprintf(stderr, "Let's print that matrix!\n");
 
-	printMatrix(resultMatrix, m, n);
+	printResult(resultMatrix, m, n);
 }
