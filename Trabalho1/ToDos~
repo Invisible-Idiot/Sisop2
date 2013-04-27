@@ -1,3 +1,4 @@
-- Corrigir bug que faz ultima linha e coluna da matriz ficar errada;
+- Corrigir bug que faz última linha e coluna da matriz ficar errada;
+- Verificar por que versão processos-unix não paraleliza tão bem;
 - Fazer consistência para se certificar de que a matriz é de fato das dimensões dadas;
 - Unificar tratamento de exceções
