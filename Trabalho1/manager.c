@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void saveMatrix(int x, int** matrix)
+void saveMatrix(int x, int y, int** matrix)
 {
       FILE *fp;
       int i;
@@ -16,7 +16,7 @@ void saveMatrix(int x, int** matrix)
       fprintf(fp, "Colunas = %d\n", x);
       for (i=0; i<x; ++i)
       {
-          for(j=0; j<x; ++j)
+          for(j=0; j<y; ++j)
           {
               fprintf(fp, "%d ", matrix[i][j]);
           }
