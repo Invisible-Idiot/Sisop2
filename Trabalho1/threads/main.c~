@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include "../manager.h"
 #include "../open.h"
 #define SUCCESS 1
 #define ARGUMENT_ERROR 2
@@ -96,7 +97,7 @@ int main(int argc, char* argv[])
 
 	if(argc < 2)
 	{
-		printf("Please provide a value for P\n");
+		printf("Please provide a number of processes\n");
 		exit(0);
 	}
 
@@ -104,7 +105,7 @@ int main(int argc, char* argv[])
 
 	if(p == 0)
 	{
-		printf("P must be an integer larger than 0\n");
+		printf("The number of processes must be an integer larger than 0\n");
 		exit(0);
 	}
 

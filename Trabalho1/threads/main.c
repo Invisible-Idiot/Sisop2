@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
 	if(argc < 2)
 	{
-		printf("Please provide a value for P\n");
+		printf("Please provide a number of processes\n");
 		exit(0);
 	}
 
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
 	if(p == 0)
 	{
-		printf("P must be an integer larger than 0\n");
+		printf("The number of processes must be an integer larger than 0\n");
 		exit(0);
 	}
 
@@ -134,5 +134,5 @@ int main(int argc, char* argv[])
 		pthread_join(pthreads[i], NULL);
 	}
 
-	printMatrix(resultMatrix, m, n);
+	saveMatrix(m, n, resultMatrix);
 }

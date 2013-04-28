@@ -25,10 +25,10 @@ void printMatrix(int** matrix, int lines, int columns)
 	{
 		for(j = 0; j < columns; j++)
 		{
-			fprintf(stderr, "%d\t", matrix[i][j]);
+			printf("%d\t", matrix[i][j]);
 		}
 		
-		fprintf(stderr, "\n");
+		printf("\n");
 	}
 }
 
@@ -40,10 +40,10 @@ void printResult(int* matrix, int lines, int columns)
 	{
 		for(j = 0; j < columns; j++)
 		{
-			fprintf(stderr, "%d\t", get(i, columns, j, matrix));
+			printf("%d\t", get(i, columns, j, matrix));
 		}
 		
-		fprintf(stderr, "\n");
+		printf("\n");
 	}
 }
 
@@ -128,6 +128,7 @@ void multiplyAt(int lineNumber)
 	int i, j;
 	int mul;
 
+	
 	for(i = 0; i < n; i++)
 	{
 		set(lineNumber, x, i, 0, resultMatrix);
@@ -149,7 +150,7 @@ int main(int argc, char* argv[])
 
 	if(argc < 2)
 	{
-		printf("Please provide a value for P\n");
+		printf("Please provide a number of processes\n");
 		exit(0);
 	}
 
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
 
 	if(p == 0)
 	{
-		printf("P must be an integer larger than 0\n");
+		printf("The number of processes must be an integer larger than 0\n");
 		exit(0);
 	}
 
@@ -165,11 +166,14 @@ int main(int argc, char* argv[])
 
 	if(status != SUCCESS)
 	{
-		printf("Matrixes are incompatible\n");
+		printf("Matrices are incompatible\n");
 		exit(0);
 	}
 
-	fprintf(stderr, "Process #%d says hello\n", this);
+	//printMatrix(matrix1, m, x);
+	//printMatrix(matrix2, x, n);
+
+	//fprintf(stderr, "Process #%d says hello\n", this);
 
 	for(i = 1; i < p; i++)
 	{
@@ -178,42 +182,45 @@ int main(int argc, char* argv[])
 		if(pid == 0)
 		{
 			this++;
-			fprintf(stderr, "Process #%d says hello\n", this);
+			//fprintf(stderr, "Process #%d says hello\n", this);
 		}
 		else
 		{
-			fprintf(stderr, "Process #%d spawned %d\n", this, pid);
+			//fprintf(stderr, "Process #%d spawned %d\n", this, pid);
 			break;
 		}
 	}
 
-	fprintf(stderr, "Process #%d will begin multiplying\n", this);
+	//fprintf(stderr, "Process #%d will begin multiplying\n", this);
 
 	for(j = 0; j < m; j++)
 	{
 		if(j % p == this)
 		{
-			fprintf(stderr, "Process #%d will begin line %d\n", this, j);
+			//fprintf(stderr, "Process #%d will begin line %d\n", this, j);
+
+			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
 			multiplyAt(j);
-			fprintf(stderr, "Process #%d multiplied line %d\n", this, j);
+
+			//fprintf(stderr, "Process #%d multiplied line %d\n", this, j);
 		}
 	}
 
-	fprintf(stderr, "Process #%d has finished multiplying\n", this);
+	//fprintf(stderr, "Process #%d has finished multiplying\n", this);
 
 	if(pid != 0)
 	{
-		fprintf(stderr, "Process #%d waiting for %d\n", this, pid);
+		//fprintf(stderr, "Process #%d waiting for %d\n", this, pid);
 		waitpid(pid, NULL, 0);
 	}
 
 	if(this != 0)
 	{
-		fprintf(stderr, "Process #%d says goodbye\n", this);
+		//fprintf(stderr, "Process #%d says goodbye\n", this);
 		exit(0);
 	}
 
-	fprintf(stderr, "Let's print that matrix!\n");
+	//fprintf(stderr, "Let's print that matrix!\n");
 
 	printResult(resultMatrix, m, n);
 }

@@ -77,14 +77,15 @@ int main()
 
 	for(i = 0; i < N; i++)
 	{
-		indices[i] = i;
 		sem_init(forks + i, 0, 1);
 	}
 
+	indices[0] = 0;
 	pthread_create(philosophers, NULL, antiPhilosopher_thread, indices);
 
 	for(i = 1; i < N; i++)
 	{
+		indices[i] = i;
 		pthread_create(philosophers + i, NULL, philosopher_thread, indices + i);
 	}
 

@@ -96,7 +96,7 @@ int ** open(char* filename, int* nLine, int* nCol)
 			
 		}
 		string[str_iterator] = TERMINATOR_CHAR;
-		matrix[*nLine-1][*nCol-1] = atoi(string);
+		//matrix[*nLine-1][*nCol-1] = atoi(string);
 		
 		fclose(newFile);
 		
