@@ -27,7 +27,7 @@ void printMatrix(int** matrix, int lines, int columns)
 		{
 			printf("%d\t", matrix[i][j]);
 		}
-		
+
 		printf("\n");
 	}
 }
@@ -42,7 +42,7 @@ void printResult(int* matrix, int lines, int columns)
 		{
 			printf("%d\t", get(i, columns, j, matrix));
 		}
-		
+
 		printf("\n");
 	}
 }
@@ -128,7 +128,7 @@ void multiplyAt(int lineNumber)
 	int i, j;
 	int mul;
 
-	
+
 	for(i = 0; i < n; i++)
 	{
 		set(lineNumber, x, i, 0, resultMatrix);
@@ -170,8 +170,8 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	//printMatrix(matrix1, m, x);
-	//printMatrix(matrix2, x, n);
+	printMatrix(matrix1, m, x);
+	printMatrix(matrix2, x, n);
 
 	//fprintf(stderr, "Process #%d says hello\n", this);
 
@@ -201,6 +201,7 @@ int main(int argc, char* argv[])
 
 			fprintf(stderr, "Process #%d multiplying line %d\n", this, i);
 			multiplyAt(j);
+			sleep(1);
 
 			//fprintf(stderr, "Process #%d multiplied line %d\n", this, j);
 		}
@@ -222,5 +223,5 @@ int main(int argc, char* argv[])
 
 	//fprintf(stderr, "Let's print that matrix!\n");
 
-	//saveMatrix(m, n, resultMatrix);
+	printResult(resultMatrix, m, n);
 }

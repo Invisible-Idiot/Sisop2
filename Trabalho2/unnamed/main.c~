@@ -42,20 +42,38 @@ void philosopher(int philosopher_number)
 		
 }
 
+void* philosopher_thread(void* arg)
+{
+	int* philosopher_number = (int*) arg;
+
+	philosopher(*philosopher_number);
+
+	return NULL;
+}
+
+int* save(int i)
+{
+	int* p = (int*) malloc(sizeof(int));
+
+	*p = i;
+
+	return p;
+}
+
 int main(int argc, char** argv)
 {
-	fprintf(stderr,"oba\n");
 	pthread_t tid;
 	int i;
 	int philo_number = atoi(argv[1]);
-	
-	mutex = calloc(philo_number,sizeof(sem_t));
+	//fprintf(stderr, "checkpoint1");
+	mutex = (sem_t*) calloc(philo_number,sizeof(sem_t));
 	n_mutex = philo_number;
-		
+		//fprintf(stderr, "checkpoint2");
 	for(i=0 ; i < philo_number ; i++)
 		sem_init(&mutex[i], 0, 1);
-
+//fprintf(stderr, "checkpoint3");
 	for(i=0 ; i < philo_number ; i++)
-		pthread_create(&tid,NULL,&philosopher,i);
-	getchar();
+		pthread_create(&tid,NULL,philosopher_thread, save(i));
+//fprintf(stderr, "checkpoint4");
+	pthread_join(tid, NULL);
 }
