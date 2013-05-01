@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 	n_mutex = philo_number;
 
 	for(i=0 ; i < philo_number ; i++)
-		pthread_create(&tid,NULL,philosopher_thread,save(i));
+		pthread_create(&tid,NULL,philosopher_thread,i);
 
 	pthread_join(tid, NULL);
 }
