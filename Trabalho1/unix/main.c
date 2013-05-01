@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 		{
 			//fprintf(stderr, "Process #%d will begin line %d\n", this, j);
 
-			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
+			fprintf(stderr, "Process #%d multiplying line %d\n", this, i);
 			multiplyAt(j);
 
 			//fprintf(stderr, "Process #%d multiplied line %d\n", this, j);
@@ -222,5 +222,5 @@ int main(int argc, char* argv[])
 
 	//fprintf(stderr, "Let's print that matrix!\n");
 
-	saveMatrix(m, n, resultMatrix);
+	//saveMatrix(m, n, resultMatrix);
 }

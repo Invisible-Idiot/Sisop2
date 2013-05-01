@@ -16,12 +16,13 @@ void philosopher(int philosopher_number)
 	{
 		
 		printf("filosfo %d tentando comer\n",philosopher_number);
-		sleep(RANDOM);
+
 		if(philosopher_number==0)
 		{
 			sem_wait(&(mutex[n_mutex-1]));
 			sem_wait(&(mutex[RIGHT]));
 			printf("filosofo %d comendo\n",philosopher_number);
+			sleep(RANDOM);
 			sem_post(&(mutex[n_mutex-1]));
 			sem_post(&(mutex[RIGHT]));
 		}
@@ -30,10 +31,11 @@ void philosopher(int philosopher_number)
 			sem_wait(&(mutex[RIGHT]));
 			sem_wait(&(mutex[LEFT]));
 			printf("filosofo %d comendo\n",philosopher_number);
+			sleep(RANDOM);
 			sem_post(&(mutex[RIGHT]));
 			sem_post(&(mutex[LEFT]));
 		}
-		printf("filosfo %d pensando\n",philosopher_number);
+		printf("filosofo %d pensando\n",philosopher_number);
 		sleep(RANDOM);
 	}
 
