@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "open.h"
 
 #define BUFFER_SIZE 20
 #define NEW_LINE '\n'
@@ -61,13 +60,12 @@ int ** open(char* filename, int* nLine, int* nCol)
 		
 		i=0;j=0;
 		c = getc(newFile);
-		int newLine =0;
+		fpos_t pos;
 		while(c!=EOF)
 		{
 			
 			if(c==SPACE)
 			{	
-				newLine =0;
 				string[str_iterator] = TERMINATOR_CHAR;
 				matrix[i][j] = atoi(string);
 				for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
@@ -80,30 +78,32 @@ int ** open(char* filename, int* nLine, int* nCol)
 			} else 
 			if(c==NEW_LINE)
 			{
-				newLine =1;
-				string[str_iterator] = TERMINATOR_CHAR;
-				matrix[i][j] = atoi(string);
+				fgetpos(newFile, &pos);
+				c = getc(newFile);
+				fsetpos(newFile, &pos);
 				
-				for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
-					string[str_iterator] = 0;
-				str_iterator =0 ; // reseta o iterador da string
-				
-				i++;
-				j=0;
+				if(c!=EOF && c!=NEW_LINE)
+				{
+					string[str_iterator] = TERMINATOR_CHAR;
+					matrix[i][j] = atoi(string);
+					
+					for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
+						string[str_iterator] = 0;
+					str_iterator =0 ; // reseta o iterador da string
+					
+					i++;
+					j=0;
+				}
 			} else
 			{
-				newLine =0;
 				string[str_iterator] = c;
 				str_iterator++;
 			}
 			c = getc(newFile);
 			
 		}
-		if(!newLine)
-		{
-			string[str_iterator] = TERMINATOR_CHAR;
-			matrix[*nLine-1][*nCol-1] = atoi(string);
-		}
+		string[str_iterator] = TERMINATOR_CHAR;
+		matrix[*nLine-1][*nCol-1] = atoi(string);
 		
 		fclose(newFile);
 		
@@ -112,7 +112,7 @@ int ** open(char* filename, int* nLine, int* nCol)
 	}
 }
 
-/*
+
 int main()
 {
 	int i=0,j=0;
@@ -127,4 +127,3 @@ int main()
 	}
 	free(m);
 }
-*/
