@@ -22,11 +22,11 @@ void philosopher(int philosopher_number)
 		{
 			pthread_mutex_lock(mutex + RIGHT);
 			while(!available[RIGHT])
-				pthread_cond_wait(cond_available + RIGHT);
+				pthread_cond_wait(cond_available + RIGHT, mutex + RIGHT);
 			available[RIGHT] = 0;
 			pthread_mutex_lock(mutex + LEFT);
 			while(!available[LEFT])
-				pthread_cond_wait(cond_available + LEFT);
+				pthread_cond_wait(cond_available + LEFT, mutex + LEFT);
 			available[LEFT] = 0;
 			printf("filosofo %d comendo\n", philosopher_number);
 			sleep(RANDOM);
@@ -50,11 +50,11 @@ void philosopher(int philosopher_number)
 		{
 			pthread_mutex_lock(mutex + LEFT);
 			while(!available[LEFT])
-				pthread_cond_wait(cond_available + LEFT);
+				pthread_cond_wait(cond_available + LEFT, mutex + LEFT);
 			available[LEFT] = 0;
 			pthread_mutex_lock(mutex + RIGHT);
 			while(!available[RIGHT])
-				pthread_cond_wait(cond_available + RIGHT);
+				pthread_cond_wait(cond_available + RIGHT, mutex + RIGHT);
 			available[RIGHT] = 0;
 			printf("filosofo %d comendo\n", philosopher_number);
 			sleep(RANDOM);

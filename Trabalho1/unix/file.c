@@ -1,12 +1,41 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include "matrix.h"
+#include "file.h"
 
 #define BUFFER_SIZE 20
 #define NEW_LINE '\n'
 #define EQUAL '='
 #define TERMINATOR_CHAR '\0'
 #define SPACE ' '
-int ** open(char* filename, int* nLine, int* nCol)
+
+int saveMatrix(int x, int y, int* matrix)
+{
+      FILE *fp;
+      int i;
+      int j;
+
+      fp = fopen("out.txt", "w+");
+      if (fp == NULL) {
+         return 0;
+      }
+      fprintf(fp, "Linhas = %d\n", x);
+      fprintf(fp, "Colunas = %d\n", x);
+      for (i=0; i<x; ++i)
+      {
+          for(j=0; j<y; ++j)
+          {
+              fprintf(fp, "%d ", get(i, x, j, matrix));
+          }
+          fprintf(fp, "\n");
+      }
+
+      fclose(fp);
+
+	return 1;
+}
+
+int ** readMatrix(char* filename, int* nLine, int* nCol)
 {
 	
 	
@@ -16,7 +45,7 @@ int ** open(char* filename, int* nLine, int* nCol)
 	FILE * newFile = fopen(filename, "r");
 	
 	
-	if(newFile == NULL) perror ("Error opening\n");
+	if(newFile == NULL) return NULL;
 	else
 	{	
 		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega até o "LINHAS ="
@@ -111,20 +140,3 @@ int ** open(char* filename, int* nLine, int* nCol)
 		free(matrix);
 	}
 }
-
-/*
-int main()
-{
-	int i=0,j=0;
-	int l,c;
-	int ** m = open("in1.txt",&l,&c);
-	printf("L = %d, C = %d\n\n",l,c);
-	for(i=0 ; i < l ; i++)
-	{
-		for(j=0; j<c ; j++)
-			printf("%d ",m[i][j]);
-		printf("\n");
-	}
-	free(m);
-}
-*/

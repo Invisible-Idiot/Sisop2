@@ -36,15 +36,6 @@ void philosopher(int philosopher_number)
 			available[LEFT] = 1;
 			pthread_cond_signal(cond_available + LEFT);
 			pthread_mutex_unlock(mutex + LEFT);
-/*
-			pthread_cond_wait(&(condition_var[n_mutex-1]), &mutex);
-			pthread_cond_wait(&(condition_var[RIGHT]), &mutex);
-			printf("filosofo %d comendo\n",philosopher_number);
-			sleep(RANDOM);
-			pthread_cond_signal(&(condition_var[n_mutex-1]), &mutex);
-			pthread_cond_signal(&(condition_var[RIGHT]), &mutex);
-*/
-			
 		}
 		else
 		{
@@ -64,14 +55,6 @@ void philosopher(int philosopher_number)
 			available[RIGHT] = 1;
 			pthread_cond_signal(cond_available + RIGHT);
 			pthread_mutex_unlock(mutex + RIGHT);
-/*
-			pthread_cond_wait(&(condition_var[LEFT]), &mutex);
-			pthread_cond_wait(&(condition_var[RIGHT]), &mutex);
-			printf("filosofo %d comendo\n",philosopher_number);
-			sleep(RANDOM);
-			pthread_cond_signal(&(condition_var[LEFT]), &mutex);
-			pthread_cond_signal(&(condition_var[RIGHT]), &mutex);
-*/
 		}
 		printf("filosfo %d pensando\n",philosopher_number);
 		sleep(RANDOM);
