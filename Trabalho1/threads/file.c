@@ -20,7 +20,7 @@ int saveMatrix(int x, int y, int** matrix)
          return 0;
       }
       fprintf(fp, "Linhas = %d\n", x);
-      fprintf(fp, "Colunas = %d\n", x);
+      fprintf(fp, "Colunas = %d\n", y);
       for (i=0; i<x; ++i)
       {
           for(j=0; j<y; ++j)

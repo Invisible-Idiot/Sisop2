@@ -55,7 +55,7 @@ void* fillMatrix(void* arg)
 	{
 		if(i % p == *this)
 		{
-			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
+			//fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
 
 			resultMatrix[i] = multiplyAt(i);
 		}

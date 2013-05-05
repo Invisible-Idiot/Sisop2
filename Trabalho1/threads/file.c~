@@ -9,7 +9,7 @@
 #define TERMINATOR_CHAR '\0'
 #define SPACE ' '
 
-int saveMatrix(int x, int y, int* matrix)
+int saveMatrix(int x, int y, int** matrix)
 {
       FILE *fp;
       int i;
@@ -25,7 +25,7 @@ int saveMatrix(int x, int y, int* matrix)
       {
           for(j=0; j<y; ++j)
           {
-              fprintf(fp, "%d ", get(i, x, j, matrix));
+              fprintf(fp, "%d ", matrix[i][j]);
           }
           fprintf(fp, "\n");
       }

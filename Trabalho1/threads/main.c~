@@ -161,16 +161,24 @@ int main(int argc, char* argv[])
 
 	for(i = 0; i < m; i++)
 	{
-		pthread_join(pthreads[i], NULL);
+		free(matrix1[i]);
 	}
+
+	free(matrix1);
 
 	for(i = 0; i < x; i++)
 	{
-		pthread_join(pthreads[i], NULL);
+		free(matrix2[i]);
 	}
+
+	free(matrix2);
 
 	for(i = 0; i < m; i++)
 	{
-		pthread_join(pthreads[i], NULL);
+		free(resultMatrix[i]);
 	}
+
+	free(resultMatrix);
+
+	return 0;
 }

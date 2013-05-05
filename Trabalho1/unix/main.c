@@ -82,15 +82,14 @@ void multiplyAt(int lineNumber)
 	int i, j;
 	int mul;
 
-
 	for(i = 0; i < n; i++)
 	{
-		set(lineNumber, x, i, 0, resultMatrix);
+		set(lineNumber, n, i, 0, resultMatrix);
 
 		for(j = 0; j < x; j++)
 		{
 			mul = matrix1[lineNumber][j] * matrix2[j][i];
-			add(lineNumber, x, i, mul, resultMatrix);
+			add(lineNumber, n, i, mul, resultMatrix);
 		}
 	}
 }
@@ -134,6 +133,9 @@ int main(int argc, char* argv[])
 			break;
 	}
 
+	//printMatrix(matrix1, m, x);
+	//printMatrix(matrix2, x, n);
+
 	for(i = 1; i < p; i++)
 	{
 		pid = fork();
@@ -152,9 +154,9 @@ int main(int argc, char* argv[])
 	{
 		if(j % p == this)
 		{
-			printf("Process #%d multiplying line %d\n", this, i);
+			//printf("Process #%d multiplying line %d\n", this, j);
 			multiplyAt(j);
-			sleep(1);
+			//sleep(1);
 		}
 	}
 
@@ -189,7 +191,7 @@ int main(int argc, char* argv[])
 
 	free(matrix2);
 
-	free(resultMatrix);
+	//free(resultMatrix);
 
 	return 0;
 }
