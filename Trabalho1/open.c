@@ -6,6 +6,25 @@
 #define EQUAL '='
 #define TERMINATOR_CHAR '\0'
 #define SPACE ' '
+
+int is_int(char c)
+{
+	if(
+	c!='0'&&
+	c!='1'&&
+	c!='2'&&
+	c!='3'&&
+	c!='4'&&
+	c!='5'&&
+	c!='6'&&
+	c!='7'&&
+	c!='8'&&
+	c!='9') 
+		return 0;
+	else
+		return 1;
+}
+
 int ** open(char* filename, int* nLine, int* nCol)
 {
 	
@@ -19,9 +38,9 @@ int ** open(char* filename, int* nLine, int* nCol)
 	if(newFile == NULL) perror ("Error opening\n");
 	else
 	{	
-		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega até o "LINHAS ="
-		getc(newFile); // lê o espaço
-		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lê o número
+		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega atÃ© o "LINHAS ="
+		getc(newFile); // lÃª o espaÃ§o
+		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lÃª o nÃºmero
 		{
 			string[str_iterator] = c;
 			str_iterator++;
@@ -36,9 +55,9 @@ int ** open(char* filename, int* nLine, int* nCol)
 		str_iterator =0 ; // reseta o iterador da string
 		
 		
-		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega até o "COLUNAS ="
-		getc(newFile); // lê o espaço
-		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lê o número
+		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega atÃ© o "COLUNAS ="
+		getc(newFile); // lÃª o espaÃ§o
+		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lÃª o nÃºmero
 		{
 			string[str_iterator] = c;
 			str_iterator++;
@@ -61,50 +80,70 @@ int ** open(char* filename, int* nLine, int* nCol)
 		i=0;j=0;
 		c = getc(newFile);
 		fpos_t pos;
+		int clean_read=0;
 		while(c!=EOF)
 		{
 			
 			if(c==SPACE)
 			{	
 				string[str_iterator] = TERMINATOR_CHAR;
-				matrix[i][j] = atoi(string);
-				for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
-					string[str_iterator] = 0;
-				str_iterator =0 ; // reseta o iterador da string
-										
-				j++;
-				
-				
-			} else 
-			if(c==NEW_LINE)
-			{
-				fgetpos(newFile, &pos);
-				c = getc(newFile);
-				fsetpos(newFile, &pos);
-				
-				if(c!=EOF && c!=NEW_LINE)
+				if(str_iterator!=0)
 				{
-					string[str_iterator] = TERMINATOR_CHAR;
 					matrix[i][j] = atoi(string);
-					
 					for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
 						string[str_iterator] = 0;
 					str_iterator =0 ; // reseta o iterador da string
-					
+										
+					j++;
+				}
+				else
+				{
+					clean_read++;
+					printf("Received excessive SPACE on line %d, ignoring...\n",i+1);
+				}						
+			} else 
+			if(c==NEW_LINE)
+			{	
+				string[str_iterator] = TERMINATOR_CHAR;
+				if(str_iterator!=0)
+				{		
+					matrix[i][j] = atoi(string);
+					for(str_iterator =0 ; str_iterator < BUFFER_SIZE ; str_iterator++) // zera o buffer
+						string[str_iterator] = 0;
+					str_iterator =0 ; // reseta o iterador da string
+			
 					i++;
 					j=0;
 				}
+				else
+				{
+					clean_read++;
+					printf("Received excessive NEW_LINE on line %d, ignoring...\n",i+1);
+				}
 			} else
+			if(is_int(c))
 			{
 				string[str_iterator] = c;
 				str_iterator++;
 			}
+			else
+			{
+				clean_read++;
+				printf("Received '%c', not an int, nor NEW_LINE, nor EOF on line %d, column %d\n",c,i+1,j+1);
+			}
 			c = getc(newFile);
 			
 		}
-		string[str_iterator] = TERMINATOR_CHAR;
-		matrix[*nLine-1][*nCol-1] = atoi(string);
-		
+		if(str_iterator!=0)
+		{
+			string[str_iterator] = TERMINATOR_CHAR;
+			//printf("%c",string[0]);
+			matrix[*nLine-1][*nCol-1] = atoi(string);
+		}
+		if(clean_read==0)
+			printf("Read OK!\n");
+		else
+			printf("%d errors...\n",clean_read);
 		fclose(newFile);
 		
 		return matrix;
@@ -112,7 +151,7 @@ int ** open(char* filename, int* nLine, int* nCol)
 	}
 }
 
-/*
+
 int main()
 {
 	int i=0,j=0;
@@ -127,4 +166,3 @@ int main()
 	}
 	free(m);
 }
-*/
