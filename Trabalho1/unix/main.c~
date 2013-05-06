@@ -133,8 +133,8 @@ int main(int argc, char* argv[])
 			break;
 	}
 
-	printMatrix(matrix1, m, x);
-	printMatrix(matrix2, x, n);
+	//printMatrix(matrix1, m, x);
+	//printMatrix(matrix2, x, n);
 
 	for(i = 1; i < p; i++)
 	{
@@ -170,7 +170,6 @@ int main(int argc, char* argv[])
 		pthread_exit(NULL);
 	}
 
-	fprintf(stderr, "%dX%d", m, n);
 	success = saveMatrix(m, n, resultMatrix);
 
 	if(!success)

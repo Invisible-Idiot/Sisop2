@@ -55,7 +55,7 @@ void* fillMatrix(void* arg)
 	{
 		if(i % p == *this)
 		{
-			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
+			//fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
 
 			resultMatrix[i] = multiplyAt(i);
 		}
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
 	p = atoi(argv[1]);
 
-	if(p == 0)
+	if(p < 0)
 	{
 		printf("The number of processes must be an integer larger than 0\n");
 		exit(0);
