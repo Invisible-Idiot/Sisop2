@@ -121,10 +121,10 @@ int main(int argc, char* argv[])
 	switch(status)
 	{
 		case MATRIX1_ERROR:
-			printf("Couldn't read in1.txt\n");
+			printf("Error reading in1.txt\n");
 			exit(0);
 		case MATRIX2_ERROR:
-			printf("Couldn't read in2.txt\n");
+			printf("Error reading in2.txt\n");
 			exit(0);
 		case INCOMPATIBLE_ERROR:
 			printf("Matrices are incompatible\n");
