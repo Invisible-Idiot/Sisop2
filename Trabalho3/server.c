@@ -25,10 +25,12 @@ int getSocket()
 	return socket2;
 }
 
-void sendMessage(const char* myMessage, int mySocket)
+void connection(void* socket_p)
 {
-	send(mySocket, myMessage, USRNAMESIZE + TEXTSIZE + 1, 0);
+	
 }
+
+/*
 
 void connection(void* socket_p)
 {
@@ -61,6 +63,8 @@ void connection(void* socket_p)
 		}
 	}
 }
+
+*/
 
 void server(void* socket_p)
 {

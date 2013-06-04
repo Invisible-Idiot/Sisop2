@@ -17,7 +17,6 @@ char* message(char* sender, char* content)
 
 	return msg;
 }
-
 message_t parseMessage(char* message)
 {
 	char delimiter[1]; delimiter[0] = '#';
@@ -28,4 +27,18 @@ message_t parseMessage(char* message)
 	message_t msg; strcpy(msg.sender, sender); strcpy(msg.content, content);
 
 	return msg;
+}
+
+size_t single(int x)
+{
+	int* p = (int*) malloc(sizeof(int));
+	*p = x;
+
+	return p;
+}
+
+void sendMessage(const char* myMessage, int mySocket)
+{
+	write(mySocket, single(strlen(myMessage)), sizeof(int));
+	write(mySocket, myMessage, USRNAMESIZE + TEXTSIZE + 1 + 1);
 }

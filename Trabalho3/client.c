@@ -39,11 +39,6 @@ int getSocket()
 	return mySocket;
 }
 
-void sendMessage(const char* myMessage, int mySocket)
-{
-	send(mySocket, myMessage, USRNAMESIZE + TEXTSIZE + 1, 0);
-}
-
 void client(void* nothing)
 {
 	int exit = 0;
