@@ -2,7 +2,7 @@
 #include <string.h>
 #include "message.h"
 
-char* message(char* sender, char* content)
+char* message(const char* sender, const char* content)
 {
 	if(strlen(sender) > USRNAMESIZE)
 		return NULL;
@@ -39,6 +39,49 @@ size_t single(int x)
 
 void sendMessage(const char* myMessage, int mySocket)
 {
-	write(mySocket, single(strlen(myMessage)), sizeof(int));
+	size_t* messageLength = single(strlen(myMessage));
+
+	write(mySocket, messageLength, sizeof(size_t));
 	write(mySocket, myMessage, USRNAMESIZE + TEXTSIZE + 1 + 1);
+
+	free(messageLength);
+}
+
+size_t readLength(int mySocket)
+{
+	size_t* length_p = (size_t*) malloc(sizeof(size_t));
+	char buffer[sizeof(size_t)];
+	int bytesRead = 0;
+
+	while(bytesRead < sizeof(size_t))
+	{
+		bytesRead += read(mySocket, buffer, sizeof(size_t) - bytesRead);
+	}
+
+	memcpy(length_p, buffer, sizeof(size_t));
+	size_t length = *length_p;
+
+	free(length_p);
+
+	return length;
+}
+
+char* receiveMessage(int mySocket)
+{
+	size_t length = readLength(mySocket);
+	char* message = (char*) calloc(length + 1);
+	char* buffer = (char*) calloc(length + 1);
+	int byteCount = 0;
+
+	while(byteCount < length)
+	{
+		int bytesRead = read(mySocket, buffer, length - bytesRead);
+		byteCount += bytesRead;
+		buffer[bytesRead] = '\0';
+		strcat(message, buffer);
+	}
+
+	free(buffer);
+
+	return message;
 }
