@@ -41,13 +41,13 @@ void sendMessage(const char* myMessage, int mySocket)
 {
 	size_t* messageLength = single(strlen(myMessage));
 
-	write(mySocket, messageLength, sizeof(size_t));
-	write(mySocket, myMessage, USRNAMESIZE + TEXTSIZE + 1 + 1);
+	write(mySocket, messageLength + 1, sizeof(size_t));
+	write(mySocket, myMessage, messageLength + 1);
 
 	free(messageLength);
 }
 
-size_t readLength(int mySocket)
+size_t receiveLength(int mySocket)
 {
 	size_t* length_p = (size_t*) malloc(sizeof(size_t));
 	char buffer[sizeof(size_t)];
@@ -81,7 +81,10 @@ char* receiveMessage(int mySocket)
 		strcat(message, buffer);
 	}
 
-	free(buffer);
+	message_t parsedMessage = parseMessage(message);
 
-	return message;
+	free(buffer);
+	free(message);
+
+	return parsedMessage;
 }

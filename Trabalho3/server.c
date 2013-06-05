@@ -6,6 +6,36 @@
 
 #define MAXCONNECTIONS 8
 
+list_t messages;
+
+void addMessage(message_t message)
+{
+	addToList(messages, message);
+}
+
+listNode_t* lastMessage()
+{
+	return messages.last;
+}
+
+listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
+{
+	if(lastSent == NULL) return NULL;
+
+	listNode_t* current = lastSent;
+	listNode_t* next = lastSent->next;
+
+	while(next != NULL)
+	{
+		current = next;
+		next = next->next;
+
+		sendMessage(message(current->message.sender, current->message.content), mySocket);
+	}
+
+	return current;
+}
+
 struct sockaddr_un localAddress()
 {
 	struct sockaddr_un address; address.sun_family = AF_UNIX; address.sun_path = /* alguma coisa */;
@@ -27,46 +57,21 @@ int getSocket()
 
 void connection(void* socket_p)
 {
-	
-}
-
-/*
-
-void connection(void* socket_p)
-{
-	int socketId = *((int*) socket_p);
-	char buffer[TEXTSIZE];
-	char aux[TEXTSIZE];
-	int bytesRead = 0;
-	int isFirstRead = 1;
+	int mySocket = *((int*) socket_p);
+	listNode_t* lastMsg = lastMessage();
+	int exit = 0;
 
 	while(!exit)
 	{
-		bytesRead += read(socketId, aux, TEXTSIZE - bytesRead);
+		message_t message = receiveMessage(mySocket);
 
-		if (bytesRead < TEXTSIZE)
-		{
-			if(isFirstRead)
-			{
-				strcpy(buffer, aux);
-				isFirstRead = 0;
-			}
-			else
-			{
-				strcat(buffer, aux);
-			}
-		}
-		else
-		{
-			enqueue(parseMessage(buffer));
-			isFirstRead = 1;
-		}
+		addMessage(parseMessage(message));
+
+		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
 	}
 }
 
-*/
-
-void server(void* socket_p)
+void main()
 {
 	int socketId = *((int*) socket_p);
 
