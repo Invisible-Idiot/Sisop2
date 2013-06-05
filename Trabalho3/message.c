@@ -17,6 +17,7 @@ char* message(const char* sender, const char* content)
 
 	return msg;
 }
+
 message_t parseMessage(char* message)
 {
 	char delimiter[1]; delimiter[0] = '#';
@@ -66,7 +67,7 @@ size_t receiveLength(int mySocket)
 	return length;
 }
 
-char* receiveMessage(int mySocket)
+message_t receiveMessage(int mySocket)
 {
 	size_t length = readLength(mySocket);
 	char* message = (char*) calloc(length + 1);
@@ -87,4 +88,9 @@ char* receiveMessage(int mySocket)
 	free(message);
 
 	return parsedMessage;
+}
+
+void printMessage(message_t message)
+{
+	printf("%s:\n%s\n\n", message.sender, message.content);
 }
