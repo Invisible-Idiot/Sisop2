@@ -7,6 +7,7 @@
 #include "list.h"
 
 #define MAXCONNECTIONS 8
+#define SOCKET_ERROR -1
 
 list_t messages;
 
@@ -55,15 +56,20 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 int getSocket()
 {
 	int socket1 = socket(AF_UNIX, SOCK_STREAM, 0);
+
+	if(socket1 == SOCKET_ERROR) return SOCKET_ERROR;
+
 	struct sockaddr_un socketAddress;
 	socketAddress.sun_family = AF_UNIX;
 	strncpy(socketAddress.sun_path, "./private/channel", 125);
 
 	int socket2 = bind(socket1, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
-	listen(socket2, MAXCONNECTIONS);
+	if(socket2 == SOCKET_ERROR) return SOCKET_ERROR;
 
-	return socket2;
+	int status = listen(socket2, MAXCONNECTIONS);
+
+	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return socket2;
 }
 
 int acceptConnection(int mySocket)
@@ -76,11 +82,11 @@ int acceptConnection(int mySocket)
 
 void* connection(void* socket_p)
 {
-	int exit = 0;
+	int finished = 0;
 	int mySocket = *((int*) socket_p);
 	listNode_t* lastMsg = lastMessage();
 
-	while(!exit)
+	while(!finished)
 	{
 		message_t message = receiveMessage(mySocket);
 
@@ -97,12 +103,32 @@ void* connection(void* socket_p)
 void main()
 {
 	int mySocket = getSocket();
+	int connectionSocket;
+
+	if(mySocket == SOCKET_ERROR)
+	{
+		printf("Could not connect to socket.\n");
+		exit(0);
+	}
+
 	pthread_t thread;
 
 	pthread_mutex_init(&mutex, NULL);
 
 	while(1)
 	{
+		connectionSocket = acceptConnection(mySocket);
+
+		if(connectionSocket == SOCKET_ERROR)
+		{
+			printf("Could not accept connection from client.\n");
+			break;
+		}
+
 		pthread_create(&thread, NULL, connection, single(acceptConnection(mySocket)));
 	}
+
+	close();
+
+	exit(0);
 }

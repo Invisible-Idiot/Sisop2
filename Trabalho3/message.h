@@ -1,6 +1,8 @@
 #define TEXTSIZE 1024
 #define USRNAMESIZE 32
 
+#define TEST(x) fprintf(stderr, "%s\n", x);
+
 struct message_s
 {
 	char* sender;

@@ -5,6 +5,8 @@
 #include <sys/un.h>
 #include "list.h"
 
+#define SOCKET_ERROR -1
+
 char* readString(size_t maxSize)
 {
 	char* buffer = (char*) malloc(maxSize + 1);
@@ -27,13 +29,15 @@ int connectToServer()
 {
 	int mySocket = socket(AF_UNIX, SOCK_STREAM, 0);
 
+	if(mySocket == SOCKET_ERROR) return SOCKET_ERROR;
+
 	struct sockaddr_un socketAddress;
 	socketAddress.sun_family = AF_UNIX;
 	strncpy(socketAddress.sun_path, "./private/channel", 125);
 
-	connect(mySocket, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
+	int status = connect(mySocket, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
-	return mySocket;
+	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return mySocket;
 }
 
 int main(int argc, char* argv[])
@@ -53,7 +57,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 */
-	int exit = 0;
+	int finished = 0;
 	char* username;
 	char* text = (char*) malloc(TEXTSIZE + 1);
 
@@ -63,9 +67,15 @@ int main(int argc, char* argv[])
 
 	int mySocket = connectToServer();
 
+	if(mySocket == SOCKET_ERROR)
+	{
+		printf("Could not connect to socket.\n");
+		exit(0);
+	}
+
 	printf("Hello, %s, welcome to chat.\n", username);
 
-	while(!exit)
+	while(!finished)
 	{
 		printMessage(receiveMessage(mySocket));
 
@@ -78,4 +88,6 @@ int main(int argc, char* argv[])
 
 	free(username);
 	free(text);
+
+	exit(0);
 }
