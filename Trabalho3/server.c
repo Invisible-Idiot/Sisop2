@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <sys/socket.h>
-#include "message.h"
+#include <sys/un.h>
+#include "list.h"
 
 #define MAXCONNECTIONS 8
 
@@ -50,35 +52,29 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 	return current;
 }
 
-struct sockaddr_un getAddress()
-{
-	struct sockaddr_un address;
-	address.sun_family = AF_UNIX;
-	strncpy(address.sun_path, "./private/channel", 125);
-
-	return address;
-}
-
 int getSocket()
 {
 	int socket1 = socket(AF_UNIX, SOCK_STREAM, 0);
-	struct sockaddr_un* socketAddress = getAddress();
+	struct sockaddr_un socketAddress;
+	socketAddress.sun_family = AF_UNIX;
+	strncpy(socketAddress.sun_path, "./private/channel", 125);
 
-	int socket2 = bind(socket1, socketAddress, sizeof(socketAddress));
+	int socket2 = bind(socket1, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
 	listen(socket2, MAXCONNECTIONS);
 
 	return socket2;
 }
 
-int accept(int mySocket)
+int acceptConnection(int mySocket)
 {
-	struct sockaddr_un* socketAddress = (struct sockaddr_un*) malloc(sizeof(struct sockaddr_un));
+	socklen_t addressSize;
+	struct sockaddr_un socketAddress;
 
-	return accept(mySocket, socketAddress, sizeof(socketAddress));
+	return accept(mySocket, (struct sockaddr*) &socketAddress, &addressSize);
 }
 
-void connection(void* socket_p)
+void* connection(void* socket_p)
 {
 	int exit = 0;
 	int mySocket = *((int*) socket_p);
@@ -88,7 +84,7 @@ void connection(void* socket_p)
 	{
 		message_t message = receiveMessage(mySocket);
 
-		addMessage(parseMessage(message));
+		addMessage(message);
 
 		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
 	}
@@ -105,8 +101,8 @@ void main()
 
 	pthread_mutex_init(&mutex, NULL);
 
-	while(true)
+	while(1)
 	{
-		pthread_create(&thread, NULL, connection, single(accept(mySocket)));
+		pthread_create(&thread, NULL, connection, single(acceptConnection(mySocket)));
 	}
 }

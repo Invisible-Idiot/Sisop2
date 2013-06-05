@@ -1,21 +1,5 @@
 #include <stdlib.h>
-#include "message.h"
 #include "list.h"
-
-struct listNode_s
-{
-	message_t this;
-	struct listNode_s* next;
-}
-
-struct list_s
-{
-	struct listNode_s* first;
-	struct listNode_s* last;
-}
-
-typedef struct listNode_s listNode_t;
-typedef struct list_s list_t;
 
 list_t* newList()
 {
@@ -30,22 +14,24 @@ listNode_t* newNode(message_t message)
 {
 	listNode_t* node = (listNode_t*) malloc(sizeof(listNode_t));
 
-	node->this = message;
+	node->message = message;
 	node->next = NULL;
 
-	return list;
+	return node;
 }
 
-void addToList(list_t* list, message_t message)
+void addToList(list_t list, message_t message)
 {
-	if(list->first == NULL)
+	listNode_t* node = newNode(message);
+
+	if(list.first == NULL)
 	{
-		list->first = message;
-		list->last = message;
+		list.first = node;
+		list.last = node;
 	}
 	else
 	{
-		list->last->next = newNode(message);
-		list->last = list->last->next;
+		list.last->next = node;
+		list.last = list.last->next;
 	}
 }

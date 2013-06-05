@@ -9,11 +9,11 @@ struct message_s
 
 typedef struct message_s message_t;
 
-char* message(char* sender, char* content);
+char* message(const char* sender, const char* content);
 
 message_t parseMessage(char* message);
 
-size_t single(int x);
+int* single(int x);
 
 void sendMessage(const char* myMessage, int mySocket);
 

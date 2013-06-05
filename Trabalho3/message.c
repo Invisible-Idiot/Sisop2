@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "message.h"
@@ -30,7 +31,7 @@ message_t parseMessage(char* message)
 	return msg;
 }
 
-size_t single(int x)
+int* single(int x)
 {
 	int* p = (int*) malloc(sizeof(int));
 	*p = x;
@@ -40,7 +41,7 @@ size_t single(int x)
 
 void sendMessage(const char* myMessage, int mySocket)
 {
-	size_t* messageLength = single(strlen(myMessage));
+	int* messageLength = single(strlen(myMessage));
 
 	write(mySocket, messageLength + 1, sizeof(size_t));
 	write(mySocket, myMessage, messageLength + 1);
@@ -69,9 +70,9 @@ size_t receiveLength(int mySocket)
 
 message_t receiveMessage(int mySocket)
 {
-	size_t length = readLength(mySocket);
-	char* message = (char*) calloc(length + 1);
-	char* buffer = (char*) calloc(length + 1);
+	size_t length = receiveLength(mySocket);
+	char* message = (char*) calloc(length + 1, sizeof(char));
+	char* buffer = (char*) calloc(length + 1, sizeof(char));
 	int byteCount = 0;
 
 	while(byteCount < length)

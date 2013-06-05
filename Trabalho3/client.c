@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
-#include "message.h"
+#include <sys/un.h>
+#include "list.h"
 
 char* readString(size_t maxSize)
 {
@@ -21,22 +23,15 @@ void readStringInto(char* str, size_t maxSize)
 	free(buffer);
 }
 
-struct sockaddr_un getAddress()
-{
-	struct sockaddr_un address;
-	address.sun_family = AF_UNIX;
-	strncpy(address.sun_path, "./private/channel", 125);
-
-	return address;
-}
-
-int connect()
+int connectToServer()
 {
 	int mySocket = socket(AF_UNIX, SOCK_STREAM, 0);
 
-	struct sockaddr_un socketAddress = getAddress();
+	struct sockaddr_un socketAddress;
+	socketAddress.sun_family = AF_UNIX;
+	strncpy(socketAddress.sun_path, "./private/channel", 125);
 
-	connect(mySocket, socketAddress, sizeof(socketAddress));
+	connect(mySocket, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
 	return mySocket;
 }
@@ -62,13 +57,13 @@ int main(int argc, char* argv[])
 	char* username;
 	char* text = (char*) malloc(TEXTSIZE + 1);
 
-	printf("Username (maximum %d characters):");
+	printf("Username (maximum %d characters):", USRNAMESIZE);
 
 	username = readString(USRNAMESIZE);
 
-	int mySocket = connect();
+	int mySocket = connectToServer();
 
-	printf("Hello, %s, welcome to chat.\n");
+	printf("Hello, %s, welcome to chat.\n", username);
 
 	while(!exit)
 	{
