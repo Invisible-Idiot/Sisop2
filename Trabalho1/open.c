@@ -38,9 +38,9 @@ int ** open(char* filename, int* nLine, int* nCol)
 	if(newFile == NULL) perror ("Error opening\n");
 	else
 	{	
-		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega até o "LINHAS ="
-		getc(newFile); // lê o espaço
-		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lê o número
+		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega atÃ© o "LINHAS ="
+		getc(newFile); // lÃª o espaÃ§o
+		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lÃª o nÃºmero
 		{
 			string[str_iterator] = c;
 			str_iterator++;
@@ -55,9 +55,9 @@ int ** open(char* filename, int* nLine, int* nCol)
 		str_iterator =0 ; // reseta o iterador da string
 		
 		
-		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega até o "COLUNAS ="
-		getc(newFile); // lê o espaço
-		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lê o número
+		for(c = getc(newFile) ; c != EQUAL ; c = getc(newFile)); // chega atÃ© o "COLUNAS ="
+		getc(newFile); // lÃª o espaÃ§o
+		for(c = getc(newFile) ; c != NEW_LINE ; c = getc(newFile)) // lÃª o nÃºmero
 		{
 			string[str_iterator] = c;
 			str_iterator++;

@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include "../manager.h"
-#include "../open.h"
-#define SUCCESS 1
-#define ARGUMENT_ERROR 2
+#include "matrix.h"
+#include "file.h"
+#define SUCCESS 0
+#define MATRIX1_ERROR 1
+#define MATRIX2_ERROR 2
+#define INCOMPATIBLE_ERROR 3
 
 int m, x, n;
 int** matrix1;
@@ -53,7 +55,7 @@ void* fillMatrix(void* arg)
 	{
 		if(i % p == *this)
 		{
-			fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
+			//fprintf(stderr, "Process #%d multiplying line %d\n", *this, i);
 
 			resultMatrix[i] = multiplyAt(i);
 		}
@@ -65,7 +67,7 @@ int** initResult()
 	int i, j;
 	int** matrix = (int**) calloc(m, sizeof(int*));
 
-	for(i = 0; i < x; i++)
+	for(i = 0; i < m; i++)
 	{
 		matrix[i] = (int*) calloc(n, sizeof(int));
 	}
@@ -77,11 +79,18 @@ int init()
 {
 	int x1, x2;
 
-	matrix1 = open("../in1.txt", &m, &x1);
-	matrix2 = open("../in2.txt", &x2, &n);
+	matrix1 = readMatrix("in1.txt", &m, &x1);
+
+	if(matrix1 == NULL)
+		return MATRIX1_ERROR;
+
+	matrix2 = readMatrix("in2.txt", &x2, &n);
+
+	if(matrix2 == NULL)
+		return MATRIX2_ERROR;
 
 	if(x1 != x2)
-		return ARGUMENT_ERROR;
+		return INCOMPATIBLE_ERROR;
 
 	x = x1;
 
@@ -103,7 +112,7 @@ int main(int argc, char* argv[])
 
 	p = atoi(argv[1]);
 
-	if(p == 0)
+	if(p <= 0)
 	{
 		printf("The number of processes must be an integer larger than 0\n");
 		exit(0);
@@ -111,10 +120,19 @@ int main(int argc, char* argv[])
 
 	status = init();
 
-	if(status != SUCCESS)
+	switch(status)
 	{
-		printf("Matrices are incompatible\n");
-		exit(0);
+		case MATRIX1_ERROR:
+			printf("Couldn't read in1.txt\n");
+			exit(0);
+		case MATRIX2_ERROR:
+			printf("Couldn't read in2.txt\n");
+			exit(0);
+		case INCOMPATIBLE_ERROR:
+			printf("Matrices are incompatible\n");
+			exit(0);
+		default: /* case SUCCESS: */
+			break;
 	}
 
 	resultMatrix = (int**) calloc(m, sizeof(int*));
@@ -134,5 +152,33 @@ int main(int argc, char* argv[])
 		pthread_join(pthreads[i], NULL);
 	}
 
-	printMatrix(resultMatrix, m, n);
+	int success = saveMatrix(m, n, resultMatrix);
+
+	if(!success)
+	{
+		printf("Couldn't write to file out.txt");
+	}
+
+	for(i = 0; i < m; i++)
+	{
+		free(matrix1[i]);
+	}
+
+	free(matrix1);
+
+	for(i = 0; i < x; i++)
+	{
+		free(matrix2[i]);
+	}
+
+	free(matrix2);
+
+	for(i = 0; i < m; i++)
+	{
+		free(resultMatrix[i]);
+	}
+
+	free(resultMatrix);
+
+	return 0;
 }

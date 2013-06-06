@@ -1,0 +1,21 @@
+#include <stdlib.h>
+
+ int* initMatrix(int lines, int columns)
+ {
+     return (int*)malloc(sizeof(int)*lines*columns);
+ }
+
+ int get(int i, int size, int j, int* matrix)
+ {
+     return matrix[(i * size) + j];
+ }
+
+ void set(int i, int size, int j, int value, int* matrix)
+ {
+     matrix[(i * size) + j] = value;
+ }
+
+ void add(int i, int size, int j, int value, int* matrix)
+ {
+     matrix[(i * size) + j] += value;
+ }
