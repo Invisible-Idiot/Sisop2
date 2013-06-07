@@ -42,12 +42,23 @@ int* single(int x)
 	return p;
 }
 
+void sendPacket(int mySocket, const void* packet, int len)
+{
+	int byteCount = 0;
+
+	while(byteCount < len)
+	{
+		byteCount += send(mySocket, packet, len - byteCount, 0);
+	}
+}
+
 void sendMessage(const char* myMessage, int mySocket)
 {
-	int* messageLength = single(strlen(myMessage) + 1);
+	size_t* messageLength = (size_t*) malloc(sizeof(size_t));
+	*messageLength = strlen(myMessage) + 1;
 
-	write(mySocket, messageLength, sizeof(size_t));
-	write(mySocket, myMessage, *messageLength);
+	sendPacket(mySocket, messageLength, sizeof(size_t));
+	sendPacket(mySocket, myMessage, *messageLength);
 
 	free(messageLength);
 }
@@ -56,17 +67,22 @@ size_t receiveLength(int mySocket)
 {
 	size_t* length_p = (size_t*) malloc(sizeof(size_t));
 	char buffer[sizeof(size_t)];
-	int bytesRead = 0;
+	char* temp = (char*) malloc(sizeof(size_t));
+	int byteCount = 0;
 
-	while(bytesRead < sizeof(size_t))
+	while(byteCount < sizeof(size_t))
 	{
-		bytesRead += read(mySocket, buffer, sizeof(size_t) - bytesRead);
+		int bytesRead = recv(mySocket, temp, sizeof(size_t) - bytesRead, 0);
+//if (bytesRead == -1) perror("read");
+		memcpy(buffer + byteCount, temp, bytesRead);
+		byteCount += bytesRead;
 	}
 
 	memcpy(length_p, buffer, sizeof(size_t));
 	size_t length = *length_p;
 
 	free(length_p);
+	free(temp);
 
 	return length;
 }
@@ -80,7 +96,7 @@ message_t receiveMessage(int mySocket)
 
 	while(byteCount < length)
 	{
-		int bytesRead = read(mySocket, buffer, length - bytesRead);
+		int bytesRead = recv(mySocket, buffer, length - byteCount, 0);
 
 		byteCount += bytesRead;
 		buffer[bytesRead] = '\0';

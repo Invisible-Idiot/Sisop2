@@ -127,12 +127,13 @@ void* connection(void* socket_p)
 	while(!finished)
 	{
 		message_t message = receiveMessage(mySocket);
-
+//TEST("Server received message!")
 		addMessage(message);
-
+//TEST("Server added message to list!")
 		printMessage(message);
-
+//TEST("Server printed message!")
 		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
+//TEST("Server sent awaiting messages!")
 	}
 
 	free(socket_p);

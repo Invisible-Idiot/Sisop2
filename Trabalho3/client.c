@@ -107,12 +107,13 @@ int main(int argc, char* argv[])
 	while(!finished)
 	{
 		receivedMessage = receiveMessage(mySocket);
-
+//TEST("Client received message!")
 		printMessage(receivedMessage);
-
+//TEST("Client printed message!")
 		readStringInto(text, TEXTSIZE);
-
+//TEST("Client read input from user!")
 		sendMessage(message(username, text), mySocket);
+//TEST("Client sent message!")
 	}
 
 	close();

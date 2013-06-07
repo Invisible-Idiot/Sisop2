@@ -17,6 +17,8 @@ message_t parseMessage(char* message);
 
 int* single(int x);
 
+void sendPacket(int mySocket, const void* packet, int len);
+
 void sendMessage(const char* myMessage, int mySocket);
 
 size_t receiveLength(int mySocket);
