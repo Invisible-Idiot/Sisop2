@@ -3,11 +3,17 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <sys/types.h>
+#include <netdb.h>
+//#include <netinet/in.h>
 #include "list.h"
 
-#define MAXCONNECTIONS 8
+#define MAXCONNECTIONS 5
 #define SOCKET_ERROR -1
+#define PORTNUMBER "4001"
+
+#define TEST(x) fprintf(stderr, "%s\n", x);
+#define PRINT(format, x) fprintf(stderr, format, x);
 
 list_t messages;
 
@@ -33,7 +39,7 @@ listNode_t* lastMessage()
 
 listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 {
-	if(lastSent == NULL) return NULL;
+	if(lastSent == NULL) return lastMessage();
 
 	pthread_mutex_lock(&mutex);
 
@@ -55,13 +61,42 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 
 int getSocket()
 {
+	struct addrinfo hints;
+	struct addrinfo* serverInfo;
+	
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
+	hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
+	hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
+
+	int error = getaddrinfo(NULL, PORTNUMBER, &hints, &serverInfo);
+
+	if(error) return SOCKET_ERROR;
+
+	int mySocket = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
+
+	if(mySocket == SOCKET_ERROR) return SOCKET_ERROR;
+
+	int status = bind(mySocket, serverInfo->ai_addr, serverInfo->ai_addrlen);
+
+	if(status == SOCKET_ERROR) return SOCKET_ERROR;
+
+	status = listen(mySocket, MAXCONNECTIONS);
+
+	freeaddrinfo(serverInfo);
+
+	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return mySocket;
+
+/*
 	int socket1 = socket(AF_UNIX, SOCK_STREAM, 0);
 
 	if(socket1 == SOCKET_ERROR) return SOCKET_ERROR;
 
-	struct sockaddr_un socketAddress;
-	socketAddress.sun_family = AF_UNIX;
-	strncpy(socketAddress.sun_path, "./private/channel", 125);
+	struct sockaddr_in socketAddress;
+	socketAddress.sin_family = AF_INET;
+	socketAddress.sin_port = htons(PORTNUMBER);
+	socketAddress.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(socketAddress.sin_zero), 8);
 
 	int socket2 = bind(socket1, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
@@ -70,14 +105,15 @@ int getSocket()
 	int status = listen(socket2, MAXCONNECTIONS);
 
 	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return socket2;
+*/
 }
 
 int acceptConnection(int mySocket)
 {
-	socklen_t addressSize;
-	struct sockaddr_un socketAddress;
+	struct sockaddr_storage clientAddress;
+	socklen_t addressSize = sizeof(clientAddress);
 
-	return accept(mySocket, (struct sockaddr*) &socketAddress, &addressSize);
+	return accept(mySocket, (struct sockaddr*) &clientAddress, &addressSize);
 }
 
 void* connection(void* socket_p)
@@ -86,11 +122,15 @@ void* connection(void* socket_p)
 	int mySocket = *((int*) socket_p);
 	listNode_t* lastMsg = lastMessage();
 
+	sendMessage(message("Server", "Hello and welcome to chat."), mySocket);
+
 	while(!finished)
 	{
 		message_t message = receiveMessage(mySocket);
 
 		addMessage(message);
+
+		printMessage(message);
 
 		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
 	}
@@ -100,8 +140,16 @@ void* connection(void* socket_p)
 	pthread_exit(NULL);
 }
 
+void initMessages()
+{
+	messages.first = NULL;
+	messages.last = NULL;
+}
+
 void main()
 {
+	initMessages();
+
 	int mySocket = getSocket();
 	int connectionSocket;
 
@@ -122,10 +170,9 @@ void main()
 		if(connectionSocket == SOCKET_ERROR)
 		{
 			printf("Could not accept connection from client.\n");
-			break;
 		}
 
-		pthread_create(&thread, NULL, connection, single(acceptConnection(mySocket)));
+		pthread_create(&thread, NULL, connection, single(connectionSocket));
 	}
 
 	close();

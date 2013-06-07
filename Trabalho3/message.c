@@ -3,6 +3,9 @@
 #include <string.h>
 #include "message.h"
 
+#define TEST(x) fprintf(stderr, "%s\n", x);
+#define PRINT(format, x) fprintf(stderr, format, x);
+
 char* message(const char* sender, const char* content)
 {
 	if(strlen(sender) > USRNAMESIZE)
@@ -41,10 +44,10 @@ int* single(int x)
 
 void sendMessage(const char* myMessage, int mySocket)
 {
-	int* messageLength = single(strlen(myMessage));
+	int* messageLength = single(strlen(myMessage) + 1);
 
-	write(mySocket, messageLength + 1, sizeof(size_t));
-	write(mySocket, myMessage, messageLength + 1);
+	write(mySocket, messageLength, sizeof(size_t));
+	write(mySocket, myMessage, *messageLength);
 
 	free(messageLength);
 }
@@ -78,6 +81,7 @@ message_t receiveMessage(int mySocket)
 	while(byteCount < length)
 	{
 		int bytesRead = read(mySocket, buffer, length - bytesRead);
+
 		byteCount += bytesRead;
 		buffer[bytesRead] = '\0';
 		strcat(message, buffer);
@@ -93,5 +97,5 @@ message_t receiveMessage(int mySocket)
 
 void printMessage(message_t message)
 {
-	printf("%s:\n%s\n\n", message.sender, message.content);
+	fprintf(stderr, "%s:\n%s\n\n", message.sender, message.content);
 }

@@ -2,10 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <sys/types.h>
+#include <netdb.h>
+//#include <netinet/in.h>
 #include "list.h"
 
 #define SOCKET_ERROR -1
+#define PORTNUMBER "4001"
+
+#define TEST(x) fprintf(stderr, "%s\n", x);
+#define PRINT(format, x) fprintf(stderr, format, x);
 
 char* readString(size_t maxSize)
 {
@@ -27,17 +33,47 @@ void readStringInto(char* str, size_t maxSize)
 
 int connectToServer()
 {
-	int mySocket = socket(AF_UNIX, SOCK_STREAM, 0);
+	struct addrinfo hints;
+	struct addrinfo* serverInfo;
+	
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
+	hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
+	hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
+
+	int error = getaddrinfo(NULL, PORTNUMBER, &hints, &serverInfo);
+
+	if(error) return SOCKET_ERROR;
+
+	int mySocket = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
 	if(mySocket == SOCKET_ERROR) return SOCKET_ERROR;
 
-	struct sockaddr_un socketAddress;
-	socketAddress.sun_family = AF_UNIX;
-	strncpy(socketAddress.sun_path, "./private/channel", 125);
+	int status = connect(mySocket, serverInfo->ai_addr, serverInfo->ai_addrlen);
+
+	freeaddrinfo(serverInfo);
+
+	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return mySocket;
+
+/*
+	struct addrinfo* res;
+	int error = getaddrinfo(NULL, PORTNUMBER
+
+	struct hostent* server = gethostbyname(hostname);
+	int mySocket = socket(AF_INET, SOCK_STREAM, 0);
+
+	if(mySocket == SOCKET_ERROR) return SOCKET_ERROR;
+
+	struct sockaddr_in socketAddress;
+	socketAddress.sin_family = AF_INET;     
+	socketAddress.sin_port = htons(PORT);    
+	socketAddress.sin_addr = *((struct in_addr *) server->h_addr);
+	bzero(&(socketAddress.sin_zero), 8);
 
 	int status = connect(mySocket, (struct sockaddr*) &socketAddress, sizeof(socketAddress));
 
 	if(status == SOCKET_ERROR) return SOCKET_ERROR; else return mySocket;
+*/
 }
 
 int main(int argc, char* argv[])
@@ -45,21 +81,16 @@ int main(int argc, char* argv[])
 /*
 	if(argc < 2)
 	{
-		printf("Please provide the name of a file to serve as communication channel.\n");
+		printf("Please provide the host name for the server. Usage: client <hostname>\n");
 		return 0;
 	}
 
-	char* filename = argv[1];
-
-	if(strlen(filename) >= 126)
-	{
-		printf("File name must be at most 125 characters long.\n");
-		return 0;
-	}
+	char* hostname = argv[1];
 */
 	int finished = 0;
 	char* username;
 	char* text = (char*) malloc(TEXTSIZE + 1);
+	message_t receivedMessage;
 
 	printf("Username (maximum %d characters):", USRNAMESIZE);
 
@@ -73,11 +104,11 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	printf("Hello, %s, welcome to chat.\n", username);
-
 	while(!finished)
 	{
-		printMessage(receiveMessage(mySocket));
+		receivedMessage = receiveMessage(mySocket);
+
+		printMessage(receivedMessage);
 
 		readStringInto(text, TEXTSIZE);
 
