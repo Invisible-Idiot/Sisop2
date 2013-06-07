@@ -24,12 +24,12 @@ char* message(const char* sender, const char* content)
 
 message_t parseMessage(char* message)
 {
-	char delimiter[1]; delimiter[0] = '#';
+	char* sender = strtok(message, "#");
+	char* content = strtok(NULL, "#");
 
-	char* sender = strtok(message, delimiter);
-	char* content = strtok(message, NULL);
-
-	message_t msg; strcpy(msg.sender, sender); strcpy(msg.content, content);
+	message_t msg;
+	msg.sender = sender;
+	msg.content = content;
 
 	return msg;
 }
@@ -90,7 +90,6 @@ message_t receiveMessage(int mySocket)
 	message_t parsedMessage = parseMessage(message);
 
 	free(buffer);
-	free(message);
 
 	return parsedMessage;
 }
