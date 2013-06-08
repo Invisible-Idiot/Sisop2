@@ -19,4 +19,6 @@ list_t* newList();
 
 listNode_t* newNode(message_t message);
 
-void addToList(list_t list, message_t message);
+void addToList(list_t* list, message_t message);
+
+void printList(list_t list);

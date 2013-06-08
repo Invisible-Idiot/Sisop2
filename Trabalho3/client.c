@@ -8,7 +8,7 @@
 #include "list.h"
 
 #define SOCKET_ERROR -1
-#define PORTNUMBER "4001"
+#define PORTNUMBER "4000"
 
 #define TEST(x) fprintf(stderr, "%s\n", x);
 #define PRINT(format, x) fprintf(stderr, format, x);
@@ -104,8 +104,11 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
+	printf("Hello, %s, and welcome to chat.\n", username);
+
 	while(!finished)
 	{
+//TEST("Client waiting for messages..")
 		receivedMessage = receiveMessage(mySocket);
 //TEST("Client received message!")
 		printMessage(receivedMessage);

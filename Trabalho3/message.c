@@ -60,6 +60,8 @@ void sendMessage(const char* myMessage, int mySocket)
 	sendPacket(mySocket, messageLength, sizeof(size_t));
 	sendPacket(mySocket, myMessage, *messageLength);
 
+//PRINT("Sent message: %s\n", myMessage)
+
 	free(messageLength);
 }
 
@@ -89,7 +91,9 @@ size_t receiveLength(int mySocket)
 
 message_t receiveMessage(int mySocket)
 {
+//TEST("Waiting for length..")
 	size_t length = receiveLength(mySocket);
+//PRINT("Received length: %d\n", (int) length)
 	char* message = (char*) calloc(length + 1, sizeof(char));
 	char* buffer = (char*) calloc(length + 1, sizeof(char));
 	int byteCount = 0;
@@ -102,7 +106,7 @@ message_t receiveMessage(int mySocket)
 		buffer[bytesRead] = '\0';
 		strcat(message, buffer);
 	}
-
+//PRINT("Received message: %s\n", message)
 	message_t parsedMessage = parseMessage(message);
 
 	free(buffer);
@@ -112,5 +116,6 @@ message_t receiveMessage(int mySocket)
 
 void printMessage(message_t message)
 {
-	fprintf(stderr, "%s:\n%s\n\n", message.sender, message.content);
+	if(message.content != NULL)
+		fprintf(stderr, "%s:\n%s\n\n", message.sender, message.content);
 }

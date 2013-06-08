@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
 
@@ -20,18 +21,28 @@ listNode_t* newNode(message_t message)
 	return node;
 }
 
-void addToList(list_t list, message_t message)
+void addToList(list_t* list, message_t message)
 {
 	listNode_t* node = newNode(message);
 
-	if(list.first == NULL)
+	if(list->first == NULL)
 	{
-		list.first = node;
-		list.last = node;
+		list->first = node;
+		list->last = node;
 	}
 	else
 	{
-		list.last->next = node;
-		list.last = list.last->next;
+		list->last->next = node;
+		list->last = list->last->next;
 	}
+}
+
+void printList(list_t list)
+{
+	listNode_t* node = list.first;
+
+	while(node != NULL)
+		printf("%p :: ", node);
+
+	printf("[]");
 }

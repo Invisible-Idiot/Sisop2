@@ -10,7 +10,7 @@
 
 #define MAXCONNECTIONS 5
 #define SOCKET_ERROR -1
-#define PORTNUMBER "4001"
+#define PORTNUMBER "4000"
 
 #define TEST(x) fprintf(stderr, "%s\n", x);
 #define PRINT(format, x) fprintf(stderr, format, x);
@@ -22,36 +22,48 @@ pthread_mutex_t mutex;
 void addMessage(message_t message)
 {
 	pthread_mutex_lock(&mutex);
-
-	addToList(messages, message);
-
+//TEST("Server locked mutex!")
+	addToList(&messages, message);
+//PRINT("Server added message: %s\n", message.content)
 	pthread_mutex_unlock(&mutex);
+//TEST("Server unlocked mutex!")
 }
 
 listNode_t* lastMessage()
 {
 	pthread_mutex_lock(&mutex);
 
-	return messages.last;
+	listNode_t* last = messages.last;
 
 	pthread_mutex_unlock(&mutex);
+
+	return last;
 }
 
 listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 {
-	if(lastSent == NULL) return lastMessage();
+	listNode_t* current;
+	listNode_t* next;
 
 	pthread_mutex_lock(&mutex);
 
-	listNode_t* current = lastSent;
-	listNode_t* next = lastSent->next;
+	current = lastSent;
+	next = current != NULL ? current->next : messages.last;
 
-	while(next != NULL)
+	if(next == NULL)
 	{
-		current = next;
-		next = next->next;
+		sendMessage(message("Server", ""), mySocket);
+	}
+	else
+	{
+		do
+		{
+			current = next;
+			next = next->next;
 
-		sendMessage(message(current->message.sender, current->message.content), mySocket);
+			sendMessage(message(current->message.sender, current->message.content), mySocket);
+		}
+		while(next != NULL);
 	}
 
 	pthread_mutex_unlock(&mutex);
@@ -63,6 +75,7 @@ int getSocket()
 {
 	struct addrinfo hints;
 	struct addrinfo* serverInfo;
+	int yes = 1;
 	
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
@@ -76,6 +89,8 @@ int getSocket()
 	int mySocket = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
 	if(mySocket == SOCKET_ERROR) return SOCKET_ERROR;
+
+	setsockopt(mySocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
 	int status = bind(mySocket, serverInfo->ai_addr, serverInfo->ai_addrlen);
 
@@ -120,12 +135,11 @@ void* connection(void* socket_p)
 {
 	int finished = 0;
 	int mySocket = *((int*) socket_p);
-	listNode_t* lastMsg = lastMessage();
-
-	sendMessage(message("Server", "Hello and welcome to chat."), mySocket);
+	listNode_t* lastMsg = sendAwaitingMessages(NULL, mySocket);
 
 	while(!finished)
 	{
+//TEST("Server waiting for messages..")
 		message_t message = receiveMessage(mySocket);
 //TEST("Server received message!")
 		addMessage(message);
