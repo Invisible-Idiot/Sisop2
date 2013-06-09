@@ -11,28 +11,81 @@
 #define MAXCONNECTIONS 5
 #define SOCKET_ERROR -1
 #define PORTNUMBER "4000"
+#define USRONLINE " is online."
+#define USRONLINE " joined the chat."
+#define USRONLINE " left the chat."
 
 list_t messages;
+list_t users;
 
-pthread_mutex_t mutex;
+pthread_mutex_t messageMutex;
+pthread_mutex_t userMutex;
 
 void addMessage(message_t message)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&messageMutex);
 //TEST("Server locked mutex!")
 	if(message.content != NULL) addToList(&messages, message);
 //PRINT("Server added message: %s\n", message.content)
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&messageMutex);
 //TEST("Server unlocked mutex!")
+}
+
+void addUser(char* username)
+{
+	message_t user;
+	user.sender = username;
+	user.content = NULL;
+
+	pthread_mutex_lock(&userMutex);
+
+	addToList(&users, user);
+
+	pthread_mutex_unlock(&userMutex);
+}
+
+void sendUsersOnline(int mySocket)
+{
+	pthread_mutex_lock(&userMutex);
+
+	listNode_t* current = users.first;
+	char* msg;
+
+	while(current != NULL)
+	{
+		msg = malloc(strlen(current.sender) + strlen(USRONLINE) + 1);
+		sprintf(msg, "%s%s", current.sender, USRONLINE);
+		sendMessage(message("", msg), mySocket);
+		free(msg);
+		current = current->next;
+	}
+
+	pthread_mutex_unlock(&userMutex);
+}
+
+void sendUserJoined(int mySocket, char* username)
+{
+	char* msg;
+	sprintf(msg, "%s%s", username, USRJOINED);
+	sendMessage(message("", msg), mySocket);
+	free(msg);
+}
+
+void sendUserLeft(int mySocket, char* username)
+{
+	char* msg;
+	sprintf(msg, "%s%s", username, USRLEFT);
+	sendMessage(message("", msg), mySocket);
+	free(msg);
 }
 
 listNode_t* lastMessage()
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&messageMutex);
 
 	listNode_t* last = messages.last;
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&messageMutex);
 
 	return last;
 }
@@ -42,7 +95,7 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 	listNode_t* current;
 	listNode_t* next;
 
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&messageMutex);
 
 	current = lastSent;
 	next = current != NULL ? current->next : messages.last;
@@ -55,9 +108,9 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 		sendMessage(message(current->message.sender, current->message.content), mySocket);
 	}
 
-	sendMessage(message("Server", ""), mySocket);
+	sendMessage(message("", ""), mySocket);
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&messageMutex);
 
 	return current;
 }
@@ -127,17 +180,18 @@ void* connection(void* socket_p)
 	int finished = 0;
 	int mySocket = *((int*) socket_p);
 	listNode_t* lastMsg = lastMessage();
+	message_t msg;
 
 	free(socket_p);
 
 	while(!finished)
 	{
 TEST("Server waiting for messages..")
-		message_t message = receiveMessage(mySocket);
+		msg = receiveMessage(mySocket);
 TEST("Server received message!")
-		addMessage(message);
+		addMessage(msg);
 TEST("Server added message to list!")
-		printMessage(message);
+		printMessage(msg);
 TEST("Server printed message!")
 		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
 TEST("Server sent awaiting messages!")
@@ -169,7 +223,7 @@ int main()
 
 	pthread_t thread;
 
-	pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&messageMutex, NULL);
 
 	while(1)
 	{

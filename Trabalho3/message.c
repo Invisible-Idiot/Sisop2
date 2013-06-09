@@ -21,7 +21,7 @@ message_t parseMessage(char* message)
 {
 	char* sender = strtok(message, "#");
 	char* content = strtok(NULL, "#");
-
+	
 	message_t msg;
 	msg.sender = sender;
 	msg.content = content;
@@ -110,6 +110,10 @@ message_t receiveMessage(int mySocket)
 
 void printMessage(message_t message)
 {
-	if(message.content != NULL)
-		fprintf(stderr, "\n%s:\n%s\n\n", message.sender, message.content);
+	if(message.content == NULL)
+		return;
+	else if(strlen(message.sender) == 0)
+		printf("\n%s\n\n", message.content);
+	else
+		printf("\n%s:\n%s\n\n", message.sender, message.content);
 }
