@@ -96,6 +96,12 @@ int main(int argc, char* argv[])
 
 	username = readString(USRNAMESIZE);
 
+	if(username[0] == '_')
+	{
+		printf("Username must not begin with underline.\n");
+		exit(0);
+	}
+
 	int mySocket = connectToServer();
 
 	if(mySocket == SOCKET_ERROR)

@@ -208,6 +208,7 @@ void* connection(void* socket_p)
 	msg = receiveMessage(mySocket);
 	addUser(msg.sender);
 	lastMsg = addMessage(userJoinedMessage(msg.sender));
+	printMessage(msg);
 	sendUsersOnline(mySocket);
 
 	while(!finished)
@@ -218,6 +219,7 @@ void* connection(void* socket_p)
 		if(msg.content != NULL && 0==strcmp(msg.content,EXIT_MESSAGE))
 		{
 			addMessage(userLeftMessage(msg.sender));
+			printMessage(msg);
 			finished = 1;
 		}
 		else

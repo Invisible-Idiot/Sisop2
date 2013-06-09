@@ -112,7 +112,7 @@ void printMessage(message_t message)
 {
 	if(message.content == NULL)
 		return;
-	else if(strcmp(message.sender, "_") == 0)
+	else if(message.sender[0] == '_')
 		printf("\n%s\n", message.content);
 	else
 		printf("\n%s:\n%s\n", message.sender, message.content);
