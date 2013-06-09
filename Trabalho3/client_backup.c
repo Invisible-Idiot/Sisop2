@@ -7,7 +7,6 @@
 //#include <netinet/in.h>
 #include "list.h"
 
-#define EXIT_MESSAGE "exit"
 #define SOCKET_ERROR -1
 #define PORTNUMBER "4000"
 
@@ -112,24 +111,19 @@ int main(int argc, char* argv[])
 		printf(">> ");
 		readStringInto(text, TEXTSIZE);
 //TEST("Client read input from user!")
-		if(0==strcmp(text,EXIT_MESSAGE))
-			finished = 1;
-		else
-		{
-			sendMessage(message(username, text), mySocket);
+		sendMessage(message(username, text), mySocket);
 //TEST("Client sent message!")
 
 //TEST("Client waiting for messages..")
-			do
-			{
+		do
+		{
 //TEST("Client receiving message..")
-				receivedMessage = receiveMessage(mySocket);
+			receivedMessage = receiveMessage(mySocket);
 //TEST("Client received message!")
-				printMessage(receivedMessage);
+			printMessage(receivedMessage);
 //TEST("Client printed message!")
-			}
-			while(receivedMessage.content != NULL);
 		}
+		while(receivedMessage.content != NULL);
 //TEST("Client finished receiving messages!")
 	}
 
