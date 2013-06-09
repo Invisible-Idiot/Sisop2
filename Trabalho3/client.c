@@ -10,9 +10,6 @@
 #define SOCKET_ERROR -1
 #define PORTNUMBER "4000"
 
-#define TEST(x) fprintf(stderr, "%s\n", x);
-#define PRINT(format, x) fprintf(stderr, format, x);
-
 char* readString(size_t maxSize)
 {
 	char* buffer = (char*) malloc(maxSize + 1);
@@ -109,17 +106,21 @@ int main(int argc, char* argv[])
 	while(!finished)
 	{
 //TEST("Client waiting for messages..")
-		receivedMessage = receiveMessage(mySocket);
+		do
+		{
+//TEST("Client receiving message..")
+			receivedMessage = receiveMessage(mySocket);
 //TEST("Client received message!")
-		printMessage(receivedMessage);
+			printMessage(receivedMessage);
 //TEST("Client printed message!")
+		}
+		while(receivedMessage.content != NULL);
+//TEST("Client finished receiving messages!")
 		readStringInto(text, TEXTSIZE);
 //TEST("Client read input from user!")
 		sendMessage(message(username, text), mySocket);
 //TEST("Client sent message!")
 	}
-
-	close();
 
 	free(username);
 	free(text);

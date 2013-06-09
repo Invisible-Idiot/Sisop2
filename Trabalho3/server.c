@@ -12,9 +12,6 @@
 #define SOCKET_ERROR -1
 #define PORTNUMBER "4000"
 
-#define TEST(x) fprintf(stderr, "%s\n", x);
-#define PRINT(format, x) fprintf(stderr, format, x);
-
 list_t messages;
 
 pthread_mutex_t mutex;
@@ -50,21 +47,15 @@ listNode_t* sendAwaitingMessages(listNode_t* lastSent, int mySocket)
 	current = lastSent;
 	next = current != NULL ? current->next : messages.last;
 
-	if(next == NULL)
+	while(next != NULL)
 	{
-		sendMessage(message("Server", ""), mySocket);
-	}
-	else
-	{
-		do
-		{
-			current = next;
-			next = next->next;
+		current = next;
+		next = next->next;
 
-			sendMessage(message(current->message.sender, current->message.content), mySocket);
-		}
-		while(next != NULL);
+		sendMessage(message(current->message.sender, current->message.content), mySocket);
 	}
+
+	sendMessage(message("Server", ""), mySocket);
 
 	pthread_mutex_unlock(&mutex);
 
@@ -137,6 +128,8 @@ void* connection(void* socket_p)
 	int mySocket = *((int*) socket_p);
 	listNode_t* lastMsg = sendAwaitingMessages(NULL, mySocket);
 
+	free(socket_p);
+
 	while(!finished)
 	{
 //TEST("Server waiting for messages..")
@@ -150,7 +143,7 @@ void* connection(void* socket_p)
 //TEST("Server sent awaiting messages!")
 	}
 
-	free(socket_p);
+	shutdown(mySocket, 2);
 
 	pthread_exit(NULL);
 }
@@ -161,7 +154,7 @@ void initMessages()
 	messages.last = NULL;
 }
 
-void main()
+int main()
 {
 	initMessages();
 
@@ -190,7 +183,7 @@ void main()
 		pthread_create(&thread, NULL, connection, single(connectionSocket));
 	}
 
-	close();
+	shutdown(mySocket, 2);
 
 	exit(0);
 }

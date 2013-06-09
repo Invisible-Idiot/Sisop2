@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "message.h"
-
-#define TEST(x) fprintf(stderr, "%s\n", x);
-#define PRINT(format, x) fprintf(stderr, format, x);
 
 char* message(const char* sender, const char* content)
 {
@@ -93,7 +92,6 @@ message_t receiveMessage(int mySocket)
 {
 //TEST("Waiting for length..")
 	size_t length = receiveLength(mySocket);
-//PRINT("Received length: %d\n", (int) length)
 	char* message = (char*) calloc(length + 1, sizeof(char));
 	char* buffer = (char*) calloc(length + 1, sizeof(char));
 	int byteCount = 0;
