@@ -21,7 +21,7 @@ listNode_t* newNode(message_t message)
 	return node;
 }
 
-void addToList(list_t* list, message_t message)
+listNode_t* addToList(list_t* list, message_t message)
 {
 	listNode_t* node = newNode(message);
 
@@ -35,6 +35,8 @@ void addToList(list_t* list, message_t message)
 		list->last->next = node;
 		list->last = list->last->next;
 	}
+
+	return node;
 }
 
 void printList(list_t list)

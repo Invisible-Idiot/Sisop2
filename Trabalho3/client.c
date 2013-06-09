@@ -106,9 +106,20 @@ int main(int argc, char* argv[])
 
 	printf("Hello, %s, and welcome to chat.\n", username);
 
+	sendMessage(message(username, ""), mySocket);
+	do
+	{
+//TEST("Client receiving message..")
+		receivedMessage = receiveMessage(mySocket);
+//TEST("Client received message!")
+		printMessage(receivedMessage);
+//TEST("Client printed message!")
+	}
+	while(receivedMessage.content != NULL);
+
 	while(!finished)
 	{
-		printf(">> ");
+		printf("\n>> ");
 		readStringInto(text, TEXTSIZE);
 //TEST("Client read input from user!")
 		sendMessage(message(username, text), mySocket);
