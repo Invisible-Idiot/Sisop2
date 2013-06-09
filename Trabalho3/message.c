@@ -7,16 +7,12 @@
 
 char* message(const char* sender, const char* content)
 {
-	if(strlen(sender) > USRNAMESIZE)
-		return NULL;
-
-	int totalSize = USRNAMESIZE + TEXTSIZE + 1 + 1;
-	char delimiter[2] = "#";
+	int totalSize = strlen(sender) + strlen(content) + 1 + 1;
 	char* msg = (char*) malloc(totalSize);
 
-	strncpy(msg, sender, USRNAMESIZE);
-	strncat(msg, delimiter, 1);
-	strncat(msg, content, TEXTSIZE);
+	strcpy(msg, sender);
+	strcat(msg, "#");
+	strcat(msg, content);
 
 	return msg;
 }
@@ -115,5 +111,5 @@ message_t receiveMessage(int mySocket)
 void printMessage(message_t message)
 {
 	if(message.content != NULL)
-		fprintf(stderr, "%s:\n%s\n\n", message.sender, message.content);
+		fprintf(stderr, "\n%s:\n%s\n\n", message.sender, message.content);
 }

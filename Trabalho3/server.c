@@ -20,7 +20,7 @@ void addMessage(message_t message)
 {
 	pthread_mutex_lock(&mutex);
 //TEST("Server locked mutex!")
-	addToList(&messages, message);
+	if(message.content != NULL) addToList(&messages, message);
 //PRINT("Server added message: %s\n", message.content)
 	pthread_mutex_unlock(&mutex);
 //TEST("Server unlocked mutex!")
@@ -126,21 +126,21 @@ void* connection(void* socket_p)
 {
 	int finished = 0;
 	int mySocket = *((int*) socket_p);
-	listNode_t* lastMsg = sendAwaitingMessages(NULL, mySocket);
+	listNode_t* lastMsg = lastMessage();
 
 	free(socket_p);
 
 	while(!finished)
 	{
-//TEST("Server waiting for messages..")
+TEST("Server waiting for messages..")
 		message_t message = receiveMessage(mySocket);
-//TEST("Server received message!")
+TEST("Server received message!")
 		addMessage(message);
-//TEST("Server added message to list!")
+TEST("Server added message to list!")
 		printMessage(message);
-//TEST("Server printed message!")
+TEST("Server printed message!")
 		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
-//TEST("Server sent awaiting messages!")
+TEST("Server sent awaiting messages!")
 	}
 
 	shutdown(mySocket, 2);

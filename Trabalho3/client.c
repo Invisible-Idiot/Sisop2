@@ -15,6 +15,9 @@ char* readString(size_t maxSize)
 	char* buffer = (char*) malloc(maxSize + 1);
 
 	fgets(buffer, maxSize + 1, stdin);
+	
+	size_t length = strlen(buffer);
+	if(buffer[length - 1] == '\n') buffer[length - 1] = '\0';
 
 	return buffer;
 }
@@ -105,6 +108,12 @@ int main(int argc, char* argv[])
 
 	while(!finished)
 	{
+		printf(">> ");
+		readStringInto(text, TEXTSIZE);
+//TEST("Client read input from user!")
+		sendMessage(message(username, text), mySocket);
+//TEST("Client sent message!")
+
 //TEST("Client waiting for messages..")
 		do
 		{
@@ -116,10 +125,6 @@ int main(int argc, char* argv[])
 		}
 		while(receivedMessage.content != NULL);
 //TEST("Client finished receiving messages!")
-		readStringInto(text, TEXTSIZE);
-//TEST("Client read input from user!")
-		sendMessage(message(username, text), mySocket);
-//TEST("Client sent message!")
 	}
 
 	free(username);

@@ -1,7 +1,7 @@
 #define TEXTSIZE 1024
 #define USRNAMESIZE 32
 
-#define TEST(x) printf("%s\n", x);
+#define TEST(x) fprintf(stderr, "%s\n", x);
 #define PRINT(format, x) printf(format, x);
 
 struct message_s
