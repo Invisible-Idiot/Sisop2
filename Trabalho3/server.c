@@ -12,8 +12,8 @@
 #define SOCKET_ERROR -1
 #define PORTNUMBER "4000"
 #define USRONLINE " is online."
-#define USRONLINE " joined the chat."
-#define USRONLINE " left the chat."
+#define USRJOINED " joined the chat."
+#define USRLEFT " left the chat."
 
 list_t messages;
 list_t users;
@@ -53,8 +53,8 @@ void sendUsersOnline(int mySocket)
 
 	while(current != NULL)
 	{
-		msg = malloc(strlen(current.sender) + strlen(USRONLINE) + 1);
-		sprintf(msg, "%s%s", current.sender, USRONLINE);
+		msg = malloc(strlen(current->message.sender) + strlen(USRONLINE) + 1);
+		sprintf(msg, "%s%s", current->message.sender, USRONLINE);
 		sendMessage(message("", msg), mySocket);
 		free(msg);
 		current = current->next;
@@ -63,20 +63,22 @@ void sendUsersOnline(int mySocket)
 	pthread_mutex_unlock(&userMutex);
 }
 
-void sendUserJoined(int mySocket, char* username)
+void userActionMessage(int mySocket, char* username, const char* action)
 {
-	char* msg;
-	sprintf(msg, "%s%s", username, USRJOINED);
+	char* msg = malloc(strlen(username) + strlen(action) + 1);
+	sprintf(msg, "%s%s", username, action);
 	sendMessage(message("", msg), mySocket);
 	free(msg);
 }
 
-void sendUserLeft(int mySocket, char* username)
+void userJoinedMessage(int mySocket, char* username)
 {
-	char* msg;
-	sprintf(msg, "%s%s", username, USRLEFT);
-	sendMessage(message("", msg), mySocket);
-	free(msg);
+	userActionMessage(mySocket, username, USRJOINED);
+}
+
+void userLeftMessage(int mySocket, char* username)
+{
+	userActionMessage(mySocket, username, USRLEFT);
 }
 
 listNode_t* lastMessage()
@@ -189,12 +191,17 @@ void* connection(void* socket_p)
 TEST("Server waiting for messages..")
 		msg = receiveMessage(mySocket);
 TEST("Server received message!")
-		addMessage(msg);
+		if(msg.content != NULL && 0==strcmp(msg.content,EXIT_MESSAGE))
+			finished = 1;
+		else
+		{
+			addMessage(msg);
 TEST("Server added message to list!")
-		printMessage(msg);
+			printMessage(msg);
 TEST("Server printed message!")
-		lastMsg = sendAwaitingMessages(lastMsg, mySocket);
+			lastMsg = sendAwaitingMessages(lastMsg, mySocket);
 TEST("Server sent awaiting messages!")
+		}
 	}
 
 	shutdown(mySocket, 2);

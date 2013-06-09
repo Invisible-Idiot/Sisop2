@@ -1,5 +1,6 @@
 #define TEXTSIZE 1024
 #define USRNAMESIZE 32
+#define EXIT_MESSAGE "exit"
 
 #define TEST(x) printf("%s\n", x);
 #define PRINT(format, x) printf(format, x);
