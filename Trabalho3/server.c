@@ -38,18 +38,54 @@ listNode_t* addMessage(message_t message)
 	return node;
 }
 
-void addUser(char* username)
+
+
+int notExistsUser(char* username)
 {
-	message_t user;
-	user.sender = username;
-	user.content = NULL;
-
-	pthread_mutex_lock(&userMutex);
-
-	addToList(&users, user);
-
-	pthread_mutex_unlock(&userMutex);
+	listNode_t* node = users.first;
+	//fprintf(stderr, "entro");
+	while(node != NULL)
+	{
+		//fprintf(stderr, "%s, %s", node->message.sender, username);
+		if(strcmp(username, node->message.sender) == 0)
+		{
+			//fprintf(stderr, "existe");
+			return 0;
+		}
+		node = node->next;
+	}
+	
+	return 1;
 }
+
+int addUser(char* username)
+{
+	if(notExistsUser(username))
+	{
+		message_t user;
+		user.sender = username;
+		user.content = NULL;
+
+		pthread_mutex_lock(&userMutex);
+
+		addToList(&users, user);
+
+		pthread_mutex_unlock(&userMutex);
+		return 1;
+	}
+	else
+	{
+		/*listNode_t* node = users.first;
+		while(node != NULL)
+		{
+			fprintf(stderr, "%s\n", node->message.sender);
+			node = node->next;
+		}*/
+		return 0;
+	}
+	
+}
+
 
 void sendUsersOnline(int mySocket)
 {
@@ -206,11 +242,22 @@ void* connection(void* socket_p)
 	free(socket_p);
 
 	msg = receiveMessage(mySocket);
-	addUser(msg.sender);
+	if(!addUser(msg.sender))
+	{
+		message_t errorMsg;
+		errorMsg.sender = "system";
+		errorMsg.content =  "usuário ja existente";
+		//printMessage(errorMsg);
+		//addMessage(errorMsg);
+		sendMessage(message("__","usuario ja existente"), mySocket);
+		finished = 1;
+	}
+	else
+	{
 	lastMsg = addMessage(userJoinedMessage(msg.sender));
 	printMessage(msg);
 	sendUsersOnline(mySocket);
-
+	
 	while(!finished)
 	{
 //TEST("Server waiting for messages..")
@@ -234,7 +281,7 @@ void* connection(void* socket_p)
 	}
 
 	shutdown(mySocket, 2);
-
+	}
 	pthread_exit(NULL);
 }
 
