@@ -73,7 +73,7 @@ size_t receiveLength(int mySocket)
 
 	while(byteCount < sizeof(size_t))
 	{
-		int bytesRead = recv(mySocket, temp, sizeof(size_t) - bytesRead, 0);
+		int bytesRead = recv(mySocket, temp, sizeof(size_t) - byteCount, 0);
 //if (bytesRead == -1) perror("read");
 		memcpy(buffer + byteCount, temp, bytesRead);
 		byteCount += bytesRead;
