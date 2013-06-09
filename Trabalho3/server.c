@@ -58,6 +58,35 @@ int notExistsUser(char* username)
 	return 1;
 }
 
+int removeUser(char* username) // retorna 1 se o usuário estava na lista, 0 caso contrário
+{
+	listNode_t* node1 = users.first;
+	listNode_t* node2 = NULL;
+	while(node1)
+	{
+		if(0==strcmp(node1->message.sender, username))
+		{
+			if(node2)
+			{
+				node2->next = node1->next;
+				return 1;
+			}
+			else
+			{
+				users.first = node1->next;
+				return 1;
+			}
+		}
+		else
+		{
+			node2 = node1;
+			node1 = node1->next;
+		}
+	}
+	return 0;
+		
+}
+
 int addUser(char* username)
 {
 	if(notExistsUser(username))
