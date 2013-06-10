@@ -64,22 +64,40 @@ int notExistsUser(char* username)
 
 int removeUser(char* username) // retorna 1 se o usuário estava na lista, 0 caso contrário
 {
+	pthread_mutex_lock(&userMutex);
+
 	listNode_t* node1 = users.first;
 	listNode_t* node2 = NULL;
+	int removed = 0;
+
 	while(node1)
 	{
 		if(0==strcmp(node1->message.sender, username))
 		{
-			if(node2)
+			if(node2 && node1->next!=NULL)
 			{
 				node2->next = node1->next;
-				return 1;
+				removed = 1;
 			}
-			else
+			else if(node2 && node1->next == NULL)
+			{
+				users.last = node2;
+				node2->next = NULL;
+				removed = 1;
+			}
+			else if(node2 == NULL && node1->next == NULL)
+			{
+				users.first = NULL;
+				users.last = NULL;
+				removed = 1;
+			}
+			else //node2 == NULL && node1->next != NULL
 			{
 				users.first = node1->next;
-				return 1;
+				removed = 1;
 			}
+
+			free(node1);
 		}
 		else
 		{
@@ -87,7 +105,10 @@ int removeUser(char* username) // retorna 1 se o usuário estava na lista, 0 cas
 			node1 = node1->next;
 		}
 	}
-	return 0;
+
+	pthread_mutex_unlock(&userMutex);
+
+	return removed;
 		
 }
 
@@ -297,6 +318,7 @@ void* connection(void* socket_p)
 
 		if(msg.content != NULL && 0==strcmp(msg.content,EXIT_MESSAGE))
 		{
+			removeUser(msg.sender);
 			addMessage(userLeftMessage(msg.sender));
 			printMessage(msg);
 			finished = 1;
