@@ -76,6 +76,21 @@ int connectToServer()
 */
 }
 
+int invalidChar(char* username)
+{
+	int i;
+	int size;
+	size = strlen(username);
+
+	for(i = 0; i < size ; i++)
+	{
+		if(username[i] == '#')
+			return 1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
 /*
@@ -102,6 +117,12 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
+	if(invalidChar(username))
+	{
+		fprintf(stderr, "Username must not contain #.\n");
+		exit(0);
+	}
+
 	int mySocket = connectToServer();
 
 	if(mySocket == SOCKET_ERROR)
@@ -110,15 +131,17 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	printf("Hello, %s, and welcome to chat.\n", username);
-
 	sendMessage(message(username, ""), mySocket);
+
 	do
 	{
 //TEST("Client receiving message..")
 		receivedMessage = receiveMessage(mySocket);
 //TEST("Client received message!")
 		printMessage(receivedMessage);
+
+		if(receivedMessage.content != NULL && strcmp(receivedMessage.content, USER_ALREADY_EXISTS) == 0)
+			finished = 1;
 //TEST("Client printed message!")
 	}
 	while(receivedMessage.content != NULL);
